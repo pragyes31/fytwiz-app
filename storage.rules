@@ -1,0 +1,15 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // MVP: allow anyone to read progress images by URL.
+    // Writes are allowed for the app to upload check-in photos.
+    // If you implement auth-backed athlete sessions, scope these down to (auth.uid == clientId).
+    match /progress/{clientId}/{fileName} {
+      allow read: if true;
+      allow write: if request.resource != null
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+  }
+}
+

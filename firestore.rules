@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isCoach() { return request.auth != null; }
+    function isOwnerCoach(coachId) { return isCoach() && request.auth.uid == coachId; }
+
+    // Coaches: fully private to the coach account
+    match /coaches/{coachId} {
+      allow read, write: if isOwnerCoach(coachId);
+    }
+
+    // Clients:
+    // - Coaches can read/write their own clients
+    // - Read is temporarily open for MVP magic-link flow (HashRouter + no athlete auth)
+    //   If you add an auth-backed athlete session, lock this down.
+    match /clients/{clientId} {
+      allow create: if isCoach();
+      allow update, delete: if isOwnerCoach(resource.data.coachId);
+      allow read: if true;
+    }
+
+    // Plans:
+    // - Read is open for MVP athlete dashboard
+    // - Writes require authenticated coach matching stored coachId
+    match /workoutPlans/{clientId} {
+      allow read: if true;
+      allow write: if isOwnerCoach(request.resource.data.coachId);
+    }
+    match /dietPlans/{clientId} {
+      allow read: if true;
+      allow write: if isOwnerCoach(request.resource.data.coachId);
+    }
+
+    // Progress logs:
+    // - Athletes can create logs without auth for MVP
+    // - Coaches can read logs (open read for MVP)
+    match /progressLogs/{logId} {
+      allow create: if request.resource.data.clientId is string
+                    && request.resource.data.date is string
+                    && request.resource.data.weight is string
+                    // ensure photos are URLs (not giant base64 strings)
+                    && (!(request.resource.data.photoUrl is string) || request.resource.data.photoUrl.matches('^https?://.*'));
+      allow read: if true;
+      allow update, delete: if false;
+    }
+  }
+}
+

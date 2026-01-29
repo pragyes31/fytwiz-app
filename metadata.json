@@ -1,0 +1,7 @@
+{
+  "name": "Fytwiz",
+  "description": "A coach-first fitness management platform to eliminate spreadsheets and PDFs for client management.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
