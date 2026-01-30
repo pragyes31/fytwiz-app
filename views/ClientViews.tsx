@@ -94,14 +94,14 @@ export const CheckInForm = ({ onCancel, onSubmit }: any) => {
       <div className="space-y-4">
         {/* Progress Photo Section */}
         <div className="space-y-2">
-          <label className="block text-[10px] font-black uppercase text-slate-400 mb-2">Progress Photo</label>
+          <label className="block text-[10px] font-black uppercase text-slate-400 mb-2">Progress Photo (optional)</label>
           {!capturedImage && !showCamera ? (
             <button 
               onClick={startCamera}
               className="w-full h-40 border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center gap-2 text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50/30 transition-all"
             >
               <Camera size={32} />
-              <span className="text-[10px] font-black uppercase tracking-widest">Snap Progress Photo</span>
+              <span className="text-[10px] font-black uppercase tracking-widest">Add Photo (Optional)</span>
             </button>
           ) : showCamera ? (
             <div className="relative rounded-[2rem] overflow-hidden bg-black aspect-[3/4]">
