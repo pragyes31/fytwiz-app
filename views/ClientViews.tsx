@@ -156,7 +156,7 @@ export const CheckInForm = ({ onCancel, onSubmit }: any) => {
       <Button onClick={handleFormSubmit} className="w-full py-4 text-lg" disabled={isSubmitting}>
         {isSubmitting ? 'Sending...' : 'Send to Coach'}
       </Button>
-      <button onClick={onCancel} className="w-full py-2 text-slate-400 font-bold uppercase text-[10px] mt-2" disabled={isSubmitting}>Back</button>
+      <button onClick={onCancel} className="w-full py-2 text-slate-400 font-bold uppercase text-[10px] mt-2">Back</button>
     </div>
   );
 };
