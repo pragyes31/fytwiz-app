@@ -22,6 +22,7 @@ export const CheckInForm = ({ onCancel, onSubmit }: any) => {
   const [followedPlan, setFollowedPlan] = useState(true);
   const [issues, setIssues] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Camera State
   const [showCamera, setShowCamera] = useState(false);
@@ -62,18 +63,27 @@ export const CheckInForm = ({ onCancel, onSubmit }: any) => {
     setShowCamera(false);
   };
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = async () => {
     if (!weight) {
       setError('Please enter your weight.');
       return;
     }
+    
     setError('');
-    onSubmit({ 
-      weight, waist, chest, biceps, thighs, calves, 
-      feedback, followedPlan, issues, 
-      photoUrl: capturedImage,
-      date: new Date().toISOString() 
-    });
+    setIsSubmitting(true);
+    
+    try {
+      await onSubmit({ 
+        weight, waist, chest, biceps, thighs, calves, 
+        feedback, followedPlan, issues, 
+        photoUrl: capturedImage,
+        date: new Date().toISOString() 
+      });
+    } catch (err: any) {
+      console.error('Error submitting check-in:', err);
+      setError(err.message || 'Failed to submit check-in. Please try again.');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -143,8 +153,10 @@ export const CheckInForm = ({ onCancel, onSubmit }: any) => {
         )}
         <div><label className="block text-[10px] font-black uppercase text-slate-400 mb-2">Weekly Notes</label><textarea className="w-full p-4 bg-slate-50 rounded-2xl min-h-[120px] outline-none border border-slate-100" value={feedback} onChange={e => setFeedback(e.target.value)} /></div>
       </div>
-      <Button onClick={handleFormSubmit} className="w-full py-4 text-lg">Send to Coach</Button>
-      <button onClick={onCancel} className="w-full py-2 text-slate-400 font-bold uppercase text-[10px] mt-2">Back</button>
+      <Button onClick={handleFormSubmit} className="w-full py-4 text-lg" disabled={isSubmitting}>
+        {isSubmitting ? 'Sending...' : 'Send to Coach'}
+      </Button>
+      <button onClick={onCancel} className="w-full py-2 text-slate-400 font-bold uppercase text-[10px] mt-2" disabled={isSubmitting}>Back</button>
     </div>
   );
 };
