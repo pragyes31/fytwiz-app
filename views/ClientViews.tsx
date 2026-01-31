@@ -8,6 +8,7 @@ import { db } from '../firebaseConfig';
 import * as Types from '../types';
 import { Logo, Button } from '../components/Shared';
 import { calculateGrandTotal } from '../helpers';
+import { Video } from 'lucide-react';
 
 export const CheckInForm = ({ onCancel, onSubmit }: any) => {
   const [weight, setWeight] = useState('');
