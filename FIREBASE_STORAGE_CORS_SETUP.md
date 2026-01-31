@@ -1,5 +1,29 @@
 # Firebase Storage CORS Setup
 
+## ⚠️ IMPORTANT: Production vs Local Development
+
+**TL;DR:** 
+- ✅ **PRODUCTION WORKS WITHOUT THIS SETUP** - When deployed to Firebase Hosting, photo uploads work perfectly without any CORS configuration
+- ⚠️ **LOCAL DEVELOPMENT NEEDS THIS** - CORS setup is ONLY required for testing from localhost (npm run dev)
+
+### Why the difference?
+
+**Production (Firebase Hosting):**
+- App is served from `fytwiz-rhl3101.web.app` or `fytwiz-rhl3101.firebaseapp.com`
+- Firebase Storage is at `fytwiz-rhl3101.firebasestorage.app`
+- Both are under the same `*.firebaseapp.com` domain → **No CORS issues!**
+- Photo uploads work out of the box ✓
+
+**Local Development (localhost):**
+- App runs on `http://localhost:3000`
+- Firebase Storage is still at `fytwiz-rhl3101.firebasestorage.app`
+- Different origins → Browser enforces CORS policy → **Blocks requests!**
+- Need CORS configuration to allow localhost ✗
+
+**Bottom line:** You can skip this setup if you only test on deployed versions. This is purely for localhost convenience.
+
+---
+
 ## Problem
 
 When uploading photos from localhost during development, you may encounter a CORS error:
@@ -113,3 +137,29 @@ If you can't configure CORS immediately, you can:
 ## For Repository Maintainers
 
 This is a **one-time setup** that should be documented in the onboarding process for new developers. The CORS configuration allows the app to work seamlessly in both development and production environments.
+
+### Decision Guide: Do You Need CORS Setup?
+
+**Skip CORS Setup if:**
+- ✅ You only test on deployed Firebase Hosting (production/staging)
+- ✅ Team members don't need to test photo uploads locally
+- ✅ You're okay with deploying to test photo upload features
+
+**Set Up CORS if:**
+- ✅ Developers need to test photo uploads from localhost
+- ✅ Team wants full feature testing in local development
+- ✅ You want faster iteration without deploying for every test
+
+### Key Points for Documentation
+
+1. **Production Deployment** → CORS NOT NEEDED
+   - Firebase Hosting serves app from same domain as Storage
+   - Photo uploads work automatically ✓
+
+2. **Local Development** → CORS NEEDED
+   - localhost is different origin than Firebase Storage
+   - Browser blocks requests without CORS configuration ✗
+
+3. **One-Time Setup** → Apply once per Firebase project
+   - All developers benefit after setup
+   - No per-developer configuration needed
