@@ -81,7 +81,16 @@ export const CheckInForm = ({ onCancel, onSubmit }: any) => {
       });
     } catch (err: any) {
       console.error('Error submitting check-in:', err);
-      setError(err.message || 'Failed to submit check-in. Please try again.');
+      // Show user-friendly error message
+      let errorMessage = 'Failed to submit check-in. Please try again.';
+      
+      if (err.message?.includes('network') || err.message?.includes('fetch')) {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      } else if (err.message?.includes('permission')) {
+        errorMessage = 'Permission denied. Please contact your coach.';
+      }
+      
+      setError(errorMessage);
       setIsSubmitting(false);
     }
   };
@@ -203,12 +212,28 @@ export const ClientDashboard = () => {
               photoUrl = await getDownloadURL(photoRef);
             }
 
-            await addDoc(collection(db, 'progressLogs'), {
-              ...log,
-              photoUrl,
+            // Build document data, excluding undefined photoUrl field to avoid Firebase error
+            const progressLogData: any = {
+              weight: log.weight,
+              waist: log.waist,
+              chest: log.chest,
+              biceps: log.biceps,
+              thighs: log.thighs,
+              calves: log.calves,
+              feedback: log.feedback,
+              followedPlan: log.followedPlan,
+              issues: log.issues,
+              date: log.date,
               coachId: client?.coachId,
               clientId: id
-            });
+            };
+
+            // Only add photoUrl if it exists (not undefined)
+            if (photoUrl) {
+              progressLogData.photoUrl = photoUrl;
+            }
+
+            await addDoc(collection(db, 'progressLogs'), progressLogData);
             await updateDoc(doc(db, 'clients', id!), { lastCheckInDate: log.date });
             setShowLogForm(false);
             setActiveTab('progress');
