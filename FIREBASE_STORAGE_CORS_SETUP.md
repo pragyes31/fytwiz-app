@@ -1,5 +1,79 @@
 # Firebase Storage CORS Setup
 
+## 🆕 Starting Fresh? Clone to Desktop
+
+**Do you have multiple fytwiz folders and confused which one to use?** Start fresh with a clean clone!
+
+### Clone Repository to Desktop
+
+**Windows PowerShell:**
+```powershell
+# Navigate to Desktop
+cd $env:USERPROFILE\Desktop
+
+# Clone the repository
+git clone https://github.com/pragyes31/fytwiz-app.git
+
+# Navigate into the project
+cd fytwiz-app
+
+# Verify you're in the right place
+dir cors.json
+# Should show cors.json file
+
+# Install dependencies
+npm install
+
+# You're ready! Continue with Step 2 (Authentication) below
+```
+
+**Windows Command Prompt:**
+```cmd
+# Navigate to Desktop
+cd %USERPROFILE%\Desktop
+
+# Clone the repository
+git clone https://github.com/pragyes31/fytwiz-app.git
+
+# Navigate into the project
+cd fytwiz-app
+
+# Verify you're in the right place
+dir cors.json
+
+# Install dependencies
+npm install
+```
+
+**macOS/Linux:**
+```bash
+# Navigate to Desktop
+cd ~/Desktop
+
+# Clone the repository
+git clone https://github.com/pragyes31/fytwiz-app.git
+
+# Navigate into the project
+cd fytwiz-app
+
+# Verify you're in the right place
+ls cors.json
+# Should show cors.json file
+
+# Install dependencies
+npm install
+
+# You're ready! Continue with Step 2 (Authentication) below
+```
+
+**After cloning:**
+- Your project is now at: Desktop/fytwiz-app
+- All files are fresh from the repository
+- You can delete the old folders in Documents if you want
+- Continue with Step 2 (Authenticate with Google Cloud) below for CORS setup
+
+---
+
 ## ⚠️ IMPORTANT: Production vs Local Development
 
 **TL;DR:** 

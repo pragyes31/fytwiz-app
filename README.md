@@ -2,12 +2,38 @@
 
 Coach-first fitness management platform (React + Firebase).
 
+## Getting Started
+
+### Clone Repository (Fresh Start)
+
+If you have multiple project folders and want to start fresh:
+
+**Windows PowerShell:**
+```powershell
+cd $env:USERPROFILE\Desktop
+git clone https://github.com/pragyes31/fytwiz-app.git
+cd fytwiz-app
+npm install
+npm run dev
+```
+
+**macOS/Linux:**
+```bash
+cd ~/Desktop
+git clone https://github.com/pragyes31/fytwiz-app.git
+cd fytwiz-app
+npm install
+npm run dev
+```
+
+This creates a clean copy at `Desktop/fytwiz-app`.
+
 ## Local dev
 
 **Prerequisites:** Node.js
 
 ```bash
-cd fytwiz-app-main
+cd fytwiz-app
 npm install
 npm run dev
 ```
