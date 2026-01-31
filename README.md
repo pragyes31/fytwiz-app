@@ -8,11 +8,15 @@ Coach-first fitness management platform (React + Firebase).
 
 If you have multiple project folders and want to start fresh:
 
+**⚠️ Note:** For CORS setup and latest fixes, checkout the `copilot/fix-weekly-checkin-submission` branch after cloning.
+
 **Windows PowerShell:**
 ```powershell
 cd $env:USERPROFILE\Desktop
 git clone https://github.com/pragyes31/fytwiz-app.git
 cd fytwiz-app
+# Optional: Checkout PR branch for latest fixes including cors.json
+git checkout copilot/fix-weekly-checkin-submission
 npm install
 npm run dev
 ```
@@ -22,6 +26,8 @@ npm run dev
 cd ~/Desktop
 git clone https://github.com/pragyes31/fytwiz-app.git
 cd fytwiz-app
+# Optional: Checkout PR branch for latest fixes including cors.json
+git checkout copilot/fix-weekly-checkin-submission
 npm install
 npm run dev
 ```

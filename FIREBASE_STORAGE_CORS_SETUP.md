@@ -4,7 +4,15 @@
 
 **Do you have multiple fytwiz folders and confused which one to use?** Start fresh with a clean clone!
 
-### Clone Repository to Desktop
+### ⚠️ IMPORTANT: cors.json is in a PR Branch
+
+The `cors.json` file and other fixes are currently in the `copilot/fix-weekly-checkin-submission` branch (pending merge to main). You have two options:
+
+**Option A: Clone and checkout the PR branch** (Recommended - includes all fixes)
+
+**Option B: Wait for merge to main** (cors.json will be available after PR is merged)
+
+### Option A: Clone Repository with PR Branch (Recommended)
 
 **Windows PowerShell:**
 ```powershell
@@ -16,6 +24,9 @@ git clone https://github.com/pragyes31/fytwiz-app.git
 
 # Navigate into the project
 cd fytwiz-app
+
+# Checkout the PR branch with all fixes
+git checkout copilot/fix-weekly-checkin-submission
 
 # Verify you're in the right place
 dir cors.json
@@ -38,6 +49,9 @@ git clone https://github.com/pragyes31/fytwiz-app.git
 # Navigate into the project
 cd fytwiz-app
 
+# Checkout the PR branch with all fixes
+git checkout copilot/fix-weekly-checkin-submission
+
 # Verify you're in the right place
 dir cors.json
 
@@ -56,6 +70,9 @@ git clone https://github.com/pragyes31/fytwiz-app.git
 # Navigate into the project
 cd fytwiz-app
 
+# Checkout the PR branch with all fixes
+git checkout copilot/fix-weekly-checkin-submission
+
 # Verify you're in the right place
 ls cors.json
 # Should show cors.json file
@@ -66,10 +83,27 @@ npm install
 # You're ready! Continue with Step 2 (Authentication) below
 ```
 
+**Troubleshooting: "cors.json not found" after clone**
+
+If `dir cors.json` or `ls cors.json` shows "file not found", you're on the wrong branch!
+
+**Solution:**
+```powershell
+# Check which branch you're on
+git branch
+
+# If not on copilot/fix-weekly-checkin-submission, switch to it:
+git checkout copilot/fix-weekly-checkin-submission
+
+# Verify cors.json now exists
+dir cors.json    # Windows
+ls cors.json     # macOS/Linux
+```
+
 **After cloning:**
 - Your project is now at: Desktop/fytwiz-app
-- All files are fresh from the repository
-- You can delete the old folders in Documents if you want
+- You're on the branch with all the latest fixes
+- cors.json file is available
 - Continue with Step 2 (Authenticate with Google Cloud) below for CORS setup
 
 ---
