@@ -44,6 +44,31 @@ You need to configure CORS rules on your Firebase Storage bucket. This is a **on
 - Google Cloud SDK installed (`gcloud` command)
 - Access to the Firebase project (fytwiz-rhl3101)
 
+### 🪟 Windows Quick Start
+
+If you're on Windows and getting "gsutil is not recognized as a command" error, follow these steps:
+
+1. **Download & Install:**
+   - Download: https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe
+   - Run the installer
+   - ✅ Check "Add gcloud to PATH" during installation
+   - Complete the installation
+
+2. **IMPORTANT - Restart your terminal:**
+   - Close PowerShell/Command Prompt completely
+   - Open a NEW PowerShell/Command Prompt window
+   - The PATH is only updated in new terminal windows!
+
+3. **Verify it works:**
+   ```powershell
+   gsutil version
+   ```
+   If this shows a version number, you're good to go! Continue to Step 2 below.
+   
+   If you still get "not recognized" error, see detailed troubleshooting in Step 1.
+
+---
+
 ### Step 1: Install Google Cloud SDK
 
 If you don't have `gsutil` installed:
@@ -53,8 +78,57 @@ If you don't have `gsutil` installed:
 brew install google-cloud-sdk
 ```
 
-**Windows:**
-Download from: https://cloud.google.com/sdk/docs/install
+**Windows (Detailed Instructions):**
+
+1. **Download the Google Cloud SDK installer:**
+   - Go to: https://cloud.google.com/sdk/docs/install
+   - Click "Download for Windows (x86_64)" 
+   - Or direct link: https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe
+
+2. **Run the installer:**
+   - Double-click the downloaded `GoogleCloudSDKInstaller.exe`
+   - Click "Yes" if prompted by User Account Control
+   - Follow the installation wizard
+   - **Important:** Keep the default installation path (usually `C:\Users\[YourUsername]\AppData\Local\Google\Cloud SDK\`)
+
+3. **During installation, make sure to check these options:**
+   - ✅ "Install bundled Python"
+   - ✅ "Run gcloud init after installation"
+   - ✅ "Add gcloud command line tools to PATH"
+
+4. **Complete the installation:**
+   - Click "Finish"
+   - A new command prompt window will open automatically
+   - If it asks to run `gcloud init`, you can skip it for now (type `N` and press Enter)
+
+5. **Verify installation:**
+   - Open a **NEW** PowerShell or Command Prompt window (important - old windows won't have updated PATH)
+   - Run: `gsutil version`
+   - You should see version information (e.g., "gsutil version: 5.xx")
+   - If you get "command not recognized", see Troubleshooting below
+
+**Troubleshooting Windows Installation:**
+
+If you get "gsutil is not recognized as an internal or external command":
+
+1. **Close and reopen PowerShell/Command Prompt**
+   - The PATH is only updated for new terminal windows
+   - Close all PowerShell/CMD windows and open a new one
+
+2. **Manually add to PATH (if still not working):**
+   - Press `Win + R`, type `sysdm.cpl`, press Enter
+   - Go to "Advanced" tab → "Environment Variables"
+   - Under "User variables", select "Path" → Click "Edit"
+   - Click "New" and add: `C:\Users\[YourUsername]\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin`
+   - Replace `[YourUsername]` with your actual Windows username
+   - Click "OK" on all dialogs
+   - Close and reopen PowerShell/CMD
+
+3. **Use full path (temporary workaround):**
+   - Instead of `gsutil`, use the full path:
+   ```powershell
+   & "C:\Users\[YourUsername]\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin\gsutil.cmd" version
+   ```
 
 **Linux:**
 ```bash
@@ -64,27 +138,56 @@ exec -l $SHELL
 
 ### Step 2: Authenticate with Google Cloud
 
+**For all operating systems (macOS, Windows, Linux):**
+
 ```bash
 gcloud auth login
 ```
 
-This will open a browser window for authentication.
+**For Windows PowerShell, you can also use:**
+```powershell
+gcloud auth login
+```
+
+This will open a browser window for authentication. Follow the prompts to sign in with your Google account that has access to the Firebase project.
 
 ### Step 3: Apply CORS Configuration
 
-Run this command from the project root directory:
+Run this command from the project root directory (where `cors.json` is located):
 
+**macOS/Linux:**
 ```bash
+gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
+```
+
+**Windows PowerShell:**
+```powershell
+gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
+```
+
+**Windows Command Prompt:**
+```cmd
 gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
 ```
 
 **Note:** Replace `fytwiz-rhl3101.firebasestorage.app` with your actual Firebase Storage bucket name if different.
 
+**If you get "gsutil is not recognized" error on Windows:**
+- Make sure you opened a NEW terminal window after installation
+- See the troubleshooting steps in Step 1 above
+- Or use the full path: `& "C:\Users\[YourUsername]\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin\gsutil.cmd" cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app`
+
 ### Step 4: Verify CORS Configuration
 
 To check if CORS is configured correctly:
 
+**macOS/Linux:**
 ```bash
+gsutil cors get gs://fytwiz-rhl3101.firebasestorage.app
+```
+
+**Windows:**
+```powershell
 gsutil cors get gs://fytwiz-rhl3101.firebasestorage.app
 ```
 
