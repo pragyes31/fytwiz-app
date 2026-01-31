@@ -340,10 +340,17 @@ Your project ID is there. Your bucket is usually: `[project-id].firebasestorage.
 
 **Now run the CORS configuration command with YOUR bucket name:**
 
+**⚠️ IMPORTANT: Use gs:// with TWO forward slashes!**
+
+The correct format is `gs://` (TWO slashes), not `gs:/` (one slash).
+
 **macOS/Linux:**
 ```bash
 # Replace YOUR-BUCKET-NAME with your actual bucket!
+# Note the gs:// with TWO slashes!
 gsutil cors set cors.json gs://YOUR-BUCKET-NAME.firebasestorage.app
+                               ^^
+                               TWO slashes here!
 
 # Example (don't copy this exactly - use YOUR bucket):
 # gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
@@ -352,7 +359,10 @@ gsutil cors set cors.json gs://YOUR-BUCKET-NAME.firebasestorage.app
 **Windows PowerShell:**
 ```powershell
 # Replace YOUR-BUCKET-NAME with your actual bucket!
+# Note the gs:// with TWO slashes!
 gsutil cors set cors.json gs://YOUR-BUCKET-NAME.firebasestorage.app
+                               ^^
+                               TWO slashes here!
 
 # Example (don't copy this exactly - use YOUR bucket):
 # gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
@@ -361,6 +371,7 @@ gsutil cors set cors.json gs://YOUR-BUCKET-NAME.firebasestorage.app
 **Windows Command Prompt:**
 ```cmd
 REM Replace YOUR-BUCKET-NAME with your actual bucket!
+REM Note the gs:// with TWO slashes!
 gsutil cors set cors.json gs://YOUR-BUCKET-NAME.firebasestorage.app
 
 REM Example (don't copy this exactly - use YOUR bucket):
@@ -368,6 +379,28 @@ REM gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
 ```
 
 **Common Errors and Solutions:**
+
+**Error: "CommandException: Incorrect option(s) specified" or URL parsing errors**
+
+**Cause:** You're missing the second slash in `gs://`!
+
+**Common mistake:**
+```bash
+# WRONG - only one slash after gs:
+gsutil cors set cors.json gs:/fytwiz-rhl3101.firebasestorage.app
+                               ^
+                               Missing second slash!
+```
+
+**Correct format:**
+```bash
+# CORRECT - TWO slashes after gs:
+gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
+                               ^^
+                               TWO slashes!
+```
+
+**Solution:** Make sure you use `gs://` with TWO forward slashes, not just one!
 
 **Error: "NotFoundException: 404 The specified bucket does not exist"**
 
@@ -393,7 +426,9 @@ This means you're using the wrong bucket name!
    - Use YOUR project's bucket name
    - Example: If your project is `my-fitness-app`, use `gs://my-fitness-app.firebasestorage.app`
 
-4. **Test if bucket exists:**
+4. **Check the format has TWO slashes:** `gs://` not `gs:/`
+
+5. **Test if bucket exists:**
    ```bash
    # List your project's buckets
    gsutil ls
@@ -550,20 +585,45 @@ Then update your code to use the emulator endpoint when in development mode.
    If this command shows your bucket, use that exact name in the cors command!
 
 4. **Common mistakes:**
+   - ❌ Using `gs:/` instead of `gs://` (missing second slash!)
    - ❌ Using `fytwiz-rhl3101.firebasestorage.app` (that's the example bucket!)
    - ❌ Using wrong project ID
    - ❌ Typo in bucket name
    - ❌ Firebase Storage not enabled in Firebase Console
    - ✅ Use YOUR bucket name from firebaseConfig.ts
+   - ✅ Use `gs://` with TWO slashes
 
 5. **Correct command format:**
    ```bash
    # Replace YOUR-BUCKET with actual bucket name!
+   # Make sure to use gs:// with TWO slashes!
    gsutil cors set cors.json gs://YOUR-BUCKET.firebasestorage.app
+                                  ^^
+                                  TWO slashes!
    
    # Example with YOUR bucket (not the example one):
    gsutil cors set cors.json gs://my-fitness-app-abc123.firebasestorage.app
    ```
+
+### Error: "CommandException" or URL parsing errors
+
+**Cause:** You're using `gs:/` (one slash) instead of `gs://` (two slashes)!
+
+**Wrong:**
+```bash
+gsutil cors set cors.json gs:/your-bucket.firebasestorage.app
+                               ^
+                               Only ONE slash - WRONG!
+```
+
+**Correct:**
+```bash
+gsutil cors set cors.json gs://your-bucket.firebasestorage.app
+                               ^^
+                               TWO slashes - CORRECT!
+```
+
+**Solution:** Always use `gs://` with TWO forward slashes after `gs:`
 
 ### Error: "OSError: No such file or directory" or "cors.json not found"
 
