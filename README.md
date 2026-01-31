@@ -12,6 +12,17 @@ npm install
 npm run dev
 ```
 
+### Photo Upload Setup (Required for Local Development)
+
+If you encounter CORS errors when uploading photos from localhost, you need to configure Firebase Storage CORS rules. This is a **one-time setup**:
+
+**See: [FIREBASE_STORAGE_CORS_SETUP.md](./FIREBASE_STORAGE_CORS_SETUP.md) for detailed instructions**
+
+Quick setup (requires Google Cloud SDK):
+```bash
+gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
+```
+
 ## Production deploy (Firebase Hosting)
 
 ### 1) Install Firebase CLI

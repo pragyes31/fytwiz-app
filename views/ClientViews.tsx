@@ -84,7 +84,12 @@ export const CheckInForm = ({ onCancel, onSubmit }: any) => {
       // Show user-friendly error message
       let errorMessage = 'Failed to submit check-in. Please try again.';
       
-      if (err.message?.includes('network') || err.message?.includes('fetch')) {
+      // Check for CORS error (common when uploading photos from localhost)
+      if (err.message?.includes('CORS') || err.message?.includes('cors') || 
+          err.code === 'storage/unauthorized' || 
+          (err.message?.includes('preflight') && err.message?.includes('blocked'))) {
+        errorMessage = 'Photo upload blocked. If testing locally, Firebase Storage CORS needs to be configured. See FIREBASE_STORAGE_CORS_SETUP.md for details.';
+      } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
         errorMessage = 'Network error. Please check your connection and try again.';
       } else if (err.message?.includes('permission')) {
         errorMessage = 'Permission denied. Please contact your coach.';
