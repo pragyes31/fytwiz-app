@@ -340,6 +340,61 @@ Your project ID is there. Your bucket is usually: `[project-id].firebasestorage.
 
 **Now run the CORS configuration command with YOUR bucket name:**
 
+**⚠️ CRITICAL: Before running the command, verify everything first!**
+
+Don't just run the command yet! Follow the pre-flight checklist below to avoid errors.
+
+### Pre-Flight Checklist - Do This FIRST!
+
+**Step 1: Verify you found YOUR bucket name (not the example)**
+
+```bash
+# Check what's in your firebaseConfig.ts
+type firebaseConfig.ts | findstr storageBucket    # Windows
+grep storageBucket firebaseConfig.ts              # macOS/Linux
+```
+
+**What did you get?**
+- If you see `fytwiz-rhl3101.firebasestorage.app` → ⚠️ STOP! This is the EXAMPLE bucket from the docs!
+- If you see YOUR OWN project name → ✅ Good! Use THIS bucket name!
+
+**Step 2: Test if you're authenticated with gcloud**
+
+```bash
+# Check who you're logged in as
+gcloud auth list
+
+# Should show an email with ACTIVE status
+# If you see "No credentialed accounts", you need to login:
+gcloud auth login
+```
+
+**Step 3: Verify the bucket actually exists**
+
+```bash
+# List ALL buckets you have access to
+gsutil ls
+
+# This should show your bucket like:
+# gs://your-project-name.firebasestorage.app/
+
+# If you don't see any buckets, Firebase Storage isn't enabled!
+```
+
+**Step 4: Test if you can access YOUR specific bucket**
+
+```bash
+# Try to list contents of YOUR bucket (replace with YOUR bucket name!)
+gsutil ls gs://YOUR-BUCKET-NAME.firebasestorage.app
+
+# If this works, you have access!
+# If you get "bucket does not exist", see troubleshooting below
+```
+
+**Step 5: Only NOW run the CORS command**
+
+After ALL the above checks pass, run:
+
 **⚠️ IMPORTANT: Use gs:// with TWO forward slashes!**
 
 The correct format is `gs://` (TWO slashes), not `gs:/` (one slash).
@@ -543,6 +598,111 @@ Then update your code to use the emulator endpoint when in development mode.
 
 ## Troubleshooting
 
+### 🆘 Still Getting "Bucket Does Not Exist" Error?
+
+**If you've tried everything and still get the error, follow this diagnostic flowchart:**
+
+**Step 1: What bucket name are you using?**
+
+```bash
+# Tell us what you're seeing
+type firebaseConfig.ts | findstr storageBucket    # Windows
+grep storageBucket firebaseConfig.ts              # macOS/Linux
+```
+
+**If you see `fytwiz-rhl3101.firebasestorage.app`:**
+- ⚠️ **PROBLEM FOUND!** This is the EXAMPLE bucket from the documentation!
+- ❌ You CANNOT use this bucket - it's someone else's project!
+- ✅ **Solution:** You need to use YOUR OWN Firebase project
+- 👉 See "Setting Up Your Own Firebase Project" section below
+
+**If you see YOUR OWN project name (e.g., `my-app-123.firebasestorage.app`):**
+- ✅ Good! Continue to Step 2
+
+**Step 2: Are you authenticated?**
+
+```bash
+gcloud auth list
+```
+
+**What do you see?**
+- ❌ "No credentialed accounts" → **You need to login!**
+  ```bash
+  gcloud auth login
+  ```
+  Follow the browser prompts to authenticate.
+
+- ✅ Shows your email with `ACTIVE` → Good! Continue to Step 3
+
+**Step 3: Does the bucket actually exist?**
+
+```bash
+gsutil ls
+```
+
+**What do you see?**
+- ❌ "Access denied" or "Invalid credentials" → Run `gcloud auth login` again
+- ❌ Empty list or no buckets → **Firebase Storage is NOT enabled!** See Step 4
+- ✅ See your bucket (gs://your-project.firebasestorage.app/) → Good! Continue to Step 5
+
+**Step 4: Is Firebase Storage enabled for your project?**
+
+Go to https://console.firebase.google.com:
+1. Select YOUR project (not fytwiz-rhl3101!)
+2. Click "Storage" in the left sidebar
+3. Do you see "Get Started" button?
+   - ✅ **YES:** Click it! Follow prompts to enable Storage. Your bucket will be created.
+   - ✅ **NO:** Storage is already enabled. Your bucket exists.
+4. After enabling, wait 30 seconds, then run `gsutil ls` again
+
+**Step 5: Can you access your specific bucket?**
+
+```bash
+# Replace YOUR-BUCKET with what you see in firebaseConfig.ts
+gsutil ls gs://YOUR-BUCKET.firebasestorage.app
+
+# Example:
+# gsutil ls gs://my-fitness-app-123.firebasestorage.app
+```
+
+**What happens?**
+- ❌ "bucket does not exist" → The bucket name is wrong or doesn't exist
+  - Double-check spelling
+  - Make sure you're using the EXACT name from firebaseConfig.ts
+  - Make sure Storage is enabled (Step 4)
+- ❌ "Access denied" → You don't have permission
+  - Ask the Firebase project owner to add you as Editor or Owner
+  - Or use the project owner's account
+- ✅ Shows empty list or files → **SUCCESS!** You have access!
+
+**Step 6: Now try the CORS command**
+
+```bash
+# Use YOUR bucket name (from firebaseConfig.ts)
+gsutil cors set cors.json gs://YOUR-BUCKET.firebasestorage.app
+
+# Make sure:
+# - You're in the project directory (where cors.json is)
+# - You use gs:// with TWO slashes
+# - You use YOUR bucket name (not the example)
+```
+
+---
+
+### Setting Up Your Own Firebase Project
+
+**If you don't have your own Firebase project yet:**
+
+1. Go to https://console.firebase.google.com
+2. Click "Add project" or "Create a project"
+3. Enter a project name (e.g., "my-fitness-app")
+4. Follow the setup wizard
+5. After creation, click "Storage" and enable it
+6. Update your `firebaseConfig.ts` with YOUR project details
+7. Then follow the CORS setup from the beginning
+
+---
+
 ### Error: "NotFoundException: 404 The specified bucket does not exist"
 
 **Cause:** You're using the wrong Firebase Storage bucket name, or Firebase Storage isn't enabled for your project!
@@ -590,8 +750,10 @@ Then update your code to use the emulator endpoint when in development mode.
    - ❌ Using wrong project ID
    - ❌ Typo in bucket name
    - ❌ Firebase Storage not enabled in Firebase Console
+   - ❌ Not authenticated with gcloud
    - ✅ Use YOUR bucket name from firebaseConfig.ts
    - ✅ Use `gs://` with TWO slashes
+   - ✅ Authenticate with `gcloud auth login`
 
 5. **Correct command format:**
    ```bash
