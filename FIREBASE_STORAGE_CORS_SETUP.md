@@ -153,7 +153,52 @@ This will open a browser window for authentication. Follow the prompts to sign i
 
 ### Step 3: Apply CORS Configuration
 
-Run this command from the project root directory (where `cors.json` is located):
+**⚠️ IMPORTANT:** You MUST run this command from the project root directory (where `cors.json` is located)!
+
+**First, navigate to the project directory:**
+
+**Windows PowerShell:**
+```powershell
+cd C:\path\to\fytwiz-app
+```
+
+**Windows Command Prompt:**
+```cmd
+cd C:\path\to\fytwiz-app
+```
+
+**macOS/Linux:**
+```bash
+cd /path/to/fytwiz-app
+```
+
+**Verify you're in the correct directory:**
+
+**Windows:**
+```powershell
+# Check current directory
+pwd
+# or
+cd
+
+# Verify cors.json exists
+dir cors.json
+# or
+ls cors.json
+```
+
+**macOS/Linux:**
+```bash
+# Check current directory
+pwd
+
+# Verify cors.json exists
+ls -la cors.json
+```
+
+You should see the cors.json file listed. If not, you're in the wrong directory!
+
+**Now run the CORS configuration command:**
 
 **macOS/Linux:**
 ```bash
@@ -172,7 +217,59 @@ gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
 
 **Note:** Replace `fytwiz-rhl3101.firebasestorage.app` with your actual Firebase Storage bucket name if different.
 
-**If you get "gsutil is not recognized" error on Windows:**
+**Common Errors and Solutions:**
+
+**Error: "OSError: No such file or directory" or "cors.json not found"**
+
+This means you're not in the correct directory! Solutions:
+
+1. **Check where you are:**
+   ```powershell
+   # Windows
+   cd
+   
+   # macOS/Linux
+   pwd
+   ```
+
+2. **Check if cors.json exists in current directory:**
+   ```powershell
+   # Windows PowerShell
+   Test-Path cors.json
+   # Should return: True
+   
+   # Or use:
+   dir cors.json
+   
+   # macOS/Linux
+   ls cors.json
+   ```
+   
+   If cors.json is NOT found, navigate to the correct directory!
+
+3. **Find your project directory:**
+   ```powershell
+   # Windows - Search for fytwiz-app folder
+   # Usually in: C:\Users\[YourUsername]\Documents\fytwiz-app
+   # Or wherever you cloned the repository
+   
+   cd C:\Users\[YourUsername]\Documents\fytwiz-app
+   
+   # macOS/Linux
+   cd ~/fytwiz-app
+   # Or wherever you cloned it
+   ```
+
+4. **Use absolute path (if nothing else works):**
+   ```powershell
+   # Windows PowerShell
+   gsutil cors set C:\Users\[YourUsername]\Documents\fytwiz-app\cors.json gs://fytwiz-rhl3101.firebasestorage.app
+   
+   # macOS/Linux
+   gsutil cors set /full/path/to/fytwiz-app/cors.json gs://fytwiz-rhl3101.firebasestorage.app
+   ```
+
+**Error: "gsutil is not recognized" on Windows:**
 - Make sure you opened a NEW terminal window after installation
 - See the troubleshooting steps in Step 1 above
 - Or use the full path: `& "C:\Users\[YourUsername]\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin\gsutil.cmd" cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app`
@@ -216,6 +313,43 @@ firebase emulators:start --only storage
 Then update your code to use the emulator endpoint when in development mode.
 
 ## Troubleshooting
+
+### Error: "OSError: No such file or directory" or "cors.json not found"
+
+**Cause:** You're running the gsutil command from the wrong directory!
+
+**Solution:**
+
+1. **Navigate to the project root directory:**
+   ```powershell
+   # Windows - Find your project folder
+   cd C:\Users\[YourUsername]\Documents\fytwiz-app
+   # Or wherever you cloned the repository
+   
+   # macOS/Linux
+   cd ~/fytwiz-app
+   ```
+
+2. **Verify you're in the right place:**
+   ```powershell
+   # Windows
+   dir cors.json
+   
+   # macOS/Linux
+   ls cors.json
+   ```
+   
+   If you see "cors.json" listed, you're in the right place! If not, keep looking for the project folder.
+
+3. **If you can't find the project folder:**
+   - Did you clone the repository? If not: `git clone https://github.com/pragyes31/fytwiz-app.git`
+   - Check your Downloads folder, Documents folder, or Desktop
+   - Try: `where.exe /r C:\ cors.json` (Windows) or `find ~ -name cors.json` (macOS/Linux)
+
+4. **Use absolute path as last resort:**
+   ```bash
+   gsutil cors set /full/path/to/fytwiz-app/cors.json gs://fytwiz-rhl3101.firebasestorage.app
+   ```
 
 ### Error: "You need Owner or Editor permissions"
 
