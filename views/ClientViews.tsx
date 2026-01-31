@@ -1,12 +1,10 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Camera, Video, X, CameraIcon, RefreshCw, CheckCircle } from 'lucide-react';
 import { 
   doc, onSnapshot, addDoc, updateDoc, query, collection, where, limit, getDocs, orderBy 
 } from 'firebase/firestore';
-import { db, storage } from '../firebaseConfig';
-import { ref, uploadString, getDownloadURL } from 'firebase/storage';
+import { db } from '../firebaseConfig';
 import * as Types from '../types';
 import { Logo, Button } from '../components/Shared';
 import { calculateGrandTotal } from '../helpers';
@@ -24,44 +22,8 @@ export const CheckInForm = ({ onCancel, onSubmit }: any) => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Camera State
-  const [showCamera, setShowCamera] = useState(false);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  const startCamera = async () => {
-    setShowCamera(true);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-    } catch (err) {
-      setError('Could not access camera. Please check permissions.');
-      setShowCamera(false);
-    }
-  };
-
-  const takePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const context = canvasRef.current.getContext('2d');
-      canvasRef.current.width = videoRef.current.videoWidth;
-      canvasRef.current.height = videoRef.current.videoHeight;
-      context?.drawImage(videoRef.current, 0, 0);
-      const dataUrl = canvasRef.current.toDataURL('image/jpeg', 0.7);
-      setCapturedImage(dataUrl);
-      stopCamera();
-    }
-  };
-
-  const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
-    }
-    setShowCamera(false);
-  };
+  // Note: Photo upload feature temporarily disabled for MVP
+  // Firebase Storage requires paid plan - can be re-enabled when ready to upgrade
 
   const handleFormSubmit = async () => {
     if (!weight) {
@@ -76,20 +38,16 @@ export const CheckInForm = ({ onCancel, onSubmit }: any) => {
       await onSubmit({ 
         weight, waist, chest, biceps, thighs, calves, 
         feedback, followedPlan, issues, 
-        photoUrl: capturedImage,
         date: new Date().toISOString() 
       });
+      setIsSubmitting(false);
     } catch (err: any) {
       console.error('Error submitting check-in:', err);
+      
       // Show user-friendly error message
       let errorMessage = 'Failed to submit check-in. Please try again.';
-      
-      // Check for CORS error (common when uploading photos from localhost)
-      if (err.message?.includes('CORS') || err.message?.includes('cors') || 
-          err.code === 'storage/unauthorized' || 
-          (err.message?.includes('preflight') && err.message?.includes('blocked'))) {
-        errorMessage = 'Photo upload blocked. If testing locally, Firebase Storage CORS needs to be configured. See FIREBASE_STORAGE_CORS_SETUP.md for details.';
-      } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
+
+      if (err.message?.includes('network') || err.message?.includes('fetch')) {
         errorMessage = 'Network error. Please check your connection and try again.';
       } else if (err.message?.includes('permission')) {
         errorMessage = 'Permission denied. Please contact your coach.';
@@ -106,42 +64,7 @@ export const CheckInForm = ({ onCancel, onSubmit }: any) => {
       {error && <div className="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-xl border border-red-100">{error}</div>}
       
       <div className="space-y-4">
-        {/* Progress Photo Section */}
-        <div className="space-y-2">
-          <label className="block text-[10px] font-black uppercase text-slate-400 mb-2">Progress Photo (optional)</label>
-          {!capturedImage && !showCamera ? (
-            <button 
-              onClick={startCamera}
-              className="w-full h-40 border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center gap-2 text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50/30 transition-all"
-            >
-              <Camera size={32} />
-              <span className="text-[10px] font-black uppercase tracking-widest">Add Photo (Optional)</span>
-            </button>
-          ) : showCamera ? (
-            <div className="relative rounded-[2rem] overflow-hidden bg-black aspect-[3/4]">
-              <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
-              <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-4 px-6">
-                <button onClick={stopCamera} className="bg-white/20 backdrop-blur-md p-4 rounded-full text-white"><X size={20}/></button>
-                <button onClick={takePhoto} className="bg-white p-4 rounded-full text-blue-600 shadow-xl scale-125"><CameraIcon size={24}/></button>
-                <div className="w-12" /> {/* Spacer */}
-              </div>
-            </div>
-          ) : (
-            <div className="relative rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm">
-              <img src={capturedImage!} alt="Progress" className="w-full aspect-[3/4] object-cover" />
-              <button 
-                onClick={() => setCapturedImage(null)} 
-                className="absolute top-4 right-4 bg-white/90 backdrop-blur p-2 rounded-full text-red-500 shadow-lg"
-              >
-                <RefreshCw size={16} />
-              </button>
-              <div className="absolute bottom-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full flex items-center gap-1.5 text-[8px] font-black uppercase">
-                <CheckCircle size={10} /> Photo Captured
-              </div>
-            </div>
-          )}
-          <canvas ref={canvasRef} className="hidden" />
-        </div>
+        {/* Photo upload feature temporarily disabled for MVP - Firebase Storage requires paid plan */}
 
         <div>
           <label className="block text-[10px] font-black uppercase text-slate-400 mb-2">Current Weight (kg) *</label>
@@ -208,16 +131,10 @@ export const ClientDashboard = () => {
         <CheckInForm 
           onCancel={() => setShowLogForm(false)} 
           onSubmit={async (log: any) => {
-            // Upload photo to Firebase Storage (instead of Base64-in-Firestore)
-            let photoUrl: string | undefined = undefined;
-            if (log.photoUrl && typeof log.photoUrl === 'string' && log.photoUrl.startsWith('data:image/')) {
-              const logId = crypto.randomUUID();
-              const photoRef = ref(storage, `progress/${id}/${logId}.jpg`);
-              await uploadString(photoRef, log.photoUrl, 'data_url');
-              photoUrl = await getDownloadURL(photoRef);
-            }
+            // Photo upload feature temporarily disabled for MVP
+            // Firebase Storage requires paid plan - can be re-enabled when ready to upgrade
 
-            // Build document data, excluding undefined photoUrl field to avoid Firebase error
+            // Build document data without photo
             const progressLogData: any = {
               weight: log.weight,
               waist: log.waist,
@@ -232,11 +149,6 @@ export const ClientDashboard = () => {
               coachId: client?.coachId,
               clientId: id
             };
-
-            // Only add photoUrl if it exists (not undefined)
-            if (photoUrl) {
-              progressLogData.photoUrl = photoUrl;
-            }
 
             await addDoc(collection(db, 'progressLogs'), progressLogData);
             await updateDoc(doc(db, 'clients', id!), { lastCheckInDate: log.date });
