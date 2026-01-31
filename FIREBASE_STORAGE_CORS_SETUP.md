@@ -306,26 +306,101 @@ ls -la cors.json
 
 You should see the cors.json file listed. If not, you're in the wrong directory!
 
-**Now run the CORS configuration command:**
+**⚠️ IMPORTANT: Find Your Firebase Storage Bucket Name First!**
+
+The bucket name in the commands below (`fytwiz-rhl3101.firebasestorage.app`) is an example. **You MUST use YOUR OWN bucket name!**
+
+**How to find your bucket name:**
+
+**Option 1: Check firebaseConfig.ts file**
+```bash
+# Look for storageBucket value in your project
+cat firebaseConfig.ts | grep storageBucket
+# or on Windows:
+type firebaseConfig.ts | findstr storageBucket
+```
+
+Example output:
+```
+storageBucket: "your-project-name.firebasestorage.app",
+```
+
+**Option 2: Firebase Console**
+1. Go to https://console.firebase.google.com
+2. Select your Firebase project
+3. Click "Storage" in the left menu
+4. Click "Get Started" if not set up yet
+5. Your bucket name is shown at the top (e.g., `your-project.firebasestorage.app`)
+
+**Option 3: Check .firebaserc file**
+```bash
+cat .firebaserc
+```
+Your project ID is there. Your bucket is usually: `[project-id].firebasestorage.app`
+
+**Now run the CORS configuration command with YOUR bucket name:**
 
 **macOS/Linux:**
 ```bash
-gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
+# Replace YOUR-BUCKET-NAME with your actual bucket!
+gsutil cors set cors.json gs://YOUR-BUCKET-NAME.firebasestorage.app
+
+# Example (don't copy this exactly - use YOUR bucket):
+# gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
 ```
 
 **Windows PowerShell:**
 ```powershell
-gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
+# Replace YOUR-BUCKET-NAME with your actual bucket!
+gsutil cors set cors.json gs://YOUR-BUCKET-NAME.firebasestorage.app
+
+# Example (don't copy this exactly - use YOUR bucket):
+# gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
 ```
 
 **Windows Command Prompt:**
 ```cmd
-gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
+REM Replace YOUR-BUCKET-NAME with your actual bucket!
+gsutil cors set cors.json gs://YOUR-BUCKET-NAME.firebasestorage.app
+
+REM Example (don't copy this exactly - use YOUR bucket):
+REM gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
 ```
 
-**Note:** Replace `fytwiz-rhl3101.firebasestorage.app` with your actual Firebase Storage bucket name if different.
-
 **Common Errors and Solutions:**
+
+**Error: "NotFoundException: 404 The specified bucket does not exist"**
+
+This means you're using the wrong bucket name!
+
+**Solutions:**
+
+1. **Verify your bucket name from firebaseConfig.ts:**
+   ```bash
+   # Check the storageBucket value
+   grep storageBucket firebaseConfig.ts
+   # or on Windows:
+   type firebaseConfig.ts | findstr storageBucket
+   ```
+
+2. **Make sure Firebase Storage is enabled:**
+   - Go to Firebase Console → Storage
+   - If you see "Get Started", click it to enable Storage
+   - Once enabled, your bucket will be created
+
+3. **Use the EXACT bucket name from your Firebase project:**
+   - Don't use `fytwiz-rhl3101.firebasestorage.app` (that's the example!)
+   - Use YOUR project's bucket name
+   - Example: If your project is `my-fitness-app`, use `gs://my-fitness-app.firebasestorage.app`
+
+4. **Test if bucket exists:**
+   ```bash
+   # List your project's buckets
+   gsutil ls
+   
+   # This should show your bucket like:
+   # gs://your-project-name.firebasestorage.app/
+   ```
 
 **Error: "OSError: No such file or directory" or "cors.json not found"**
 
@@ -387,16 +462,27 @@ This means you're not in the correct directory! Solutions:
 To check if CORS is configured correctly:
 
 **macOS/Linux:**
+**macOS/Linux:**
 ```bash
-gsutil cors get gs://fytwiz-rhl3101.firebasestorage.app
+# Use YOUR bucket name!
+gsutil cors get gs://YOUR-BUCKET.firebasestorage.app
+
+# Example (use YOUR bucket, not this):
+# gsutil cors get gs://fytwiz-rhl3101.firebasestorage.app
 ```
 
 **Windows:**
 ```powershell
-gsutil cors get gs://fytwiz-rhl3101.firebasestorage.app
+# Use YOUR bucket name!
+gsutil cors get gs://YOUR-BUCKET.firebasestorage.app
+
+# Example (use YOUR bucket, not this):
+# gsutil cors get gs://fytwiz-rhl3101.firebasestorage.app
 ```
 
 This should display the CORS rules from `cors.json`.
+
+If you get "bucket does not exist" error, you're using the wrong bucket name! See the Troubleshooting section below.
 
 ## What the CORS Configuration Does
 
@@ -421,6 +507,63 @@ firebase emulators:start --only storage
 Then update your code to use the emulator endpoint when in development mode.
 
 ## Troubleshooting
+
+### Error: "NotFoundException: 404 The specified bucket does not exist"
+
+**Cause:** You're using the wrong Firebase Storage bucket name, or Firebase Storage isn't enabled for your project!
+
+**Solution:**
+
+1. **Find YOUR actual bucket name:**
+   
+   **Check firebaseConfig.ts:**
+   ```bash
+   # Look for storageBucket in your project
+   grep storageBucket firebaseConfig.ts
+   
+   # or on Windows:
+   type firebaseConfig.ts | findstr storageBucket
+   ```
+   
+   You'll see something like:
+   ```
+   storageBucket: "your-project-123.firebasestorage.app",
+   ```
+   
+   **Use THAT bucket name** (not `fytwiz-rhl3101.firebasestorage.app`)!
+
+2. **Make sure Firebase Storage is enabled:**
+   - Go to https://console.firebase.google.com
+   - Select your Firebase project
+   - Click "Storage" in left menu
+   - If you see "Get Started", click it to enable Storage
+   - Your bucket will be automatically created
+
+3. **Verify the bucket exists:**
+   ```bash
+   # List all buckets in your project
+   gsutil ls
+   
+   # Should show: gs://your-project-name.firebasestorage.app/
+   ```
+   
+   If this command shows your bucket, use that exact name in the cors command!
+
+4. **Common mistakes:**
+   - ❌ Using `fytwiz-rhl3101.firebasestorage.app` (that's the example bucket!)
+   - ❌ Using wrong project ID
+   - ❌ Typo in bucket name
+   - ❌ Firebase Storage not enabled in Firebase Console
+   - ✅ Use YOUR bucket name from firebaseConfig.ts
+
+5. **Correct command format:**
+   ```bash
+   # Replace YOUR-BUCKET with actual bucket name!
+   gsutil cors set cors.json gs://YOUR-BUCKET.firebasestorage.app
+   
+   # Example with YOUR bucket (not the example one):
+   gsutil cors set cors.json gs://my-fitness-app-abc123.firebasestorage.app
+   ```
 
 ### Error: "OSError: No such file or directory" or "cors.json not found"
 
@@ -456,7 +599,8 @@ Then update your code to use the emulator endpoint when in development mode.
 
 4. **Use absolute path as last resort:**
    ```bash
-   gsutil cors set /full/path/to/fytwiz-app/cors.json gs://fytwiz-rhl3101.firebasestorage.app
+   # Use YOUR bucket name here too!
+   gsutil cors set /full/path/to/fytwiz-app/cors.json gs://YOUR-BUCKET.firebasestorage.app
    ```
 
 ### Error: "You need Owner or Editor permissions"
@@ -468,9 +612,9 @@ If you get a permissions error, you need to:
 ### CORS Still Not Working
 
 1. Clear browser cache and cookies
-2. Check that you're using the correct bucket name
+2. **Check that you're using YOUR bucket name (not the example one!)**
 3. Wait a few minutes for changes to propagate
-4. Verify the CORS configuration with the `gsutil cors get` command
+4. Verify the CORS configuration with: `gsutil cors get gs://YOUR-BUCKET.firebasestorage.app`
 
 ### Development Without CORS Setup
 

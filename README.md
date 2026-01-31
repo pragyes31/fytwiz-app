@@ -56,7 +56,12 @@ If you encounter CORS errors when uploading photos from localhost, you need to c
 
 Quick setup (requires Google Cloud SDK):
 ```bash
-gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
+# IMPORTANT: Replace YOUR-BUCKET with your actual Firebase Storage bucket name!
+# Find it in firebaseConfig.ts under "storageBucket"
+gsutil cors set cors.json gs://YOUR-BUCKET.firebasestorage.app
+
+# Example (don't copy this - use YOUR bucket!):
+# gsutil cors set cors.json gs://fytwiz-rhl3101.firebasestorage.app
 ```
 
 **Can't set up CORS?** Just deploy and test on Firebase Hosting - photo uploads work perfectly there!
