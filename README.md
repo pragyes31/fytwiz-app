@@ -2,6 +2,15 @@
 
 Coach-first fitness management platform (React + Firebase).
 
+---
+
+## 🚨 SEEING ERRORS? → [FIX_YOUR_ERRORS_NOW.md](./FIX_YOUR_ERRORS_NOW.md)
+
+**Git push rejected? Firebase Storage error?**
+→ See [FIX_YOUR_ERRORS_NOW.md](./FIX_YOUR_ERRORS_NOW.md) for 3-command fix!
+
+---
+
 ## Getting Started
 
 ### Clone Repository (Fresh Start)
