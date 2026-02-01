@@ -2,7 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+// Storage removed for MVP - no photo uploads (Firebase Storage requires paid plan)
 
 /**
  * PRODUCTION SECURITY RULES (COPY & PASTE INTO FIREBASE CONSOLE):
@@ -56,6 +56,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export const storage = getStorage(app);
+// Storage export removed - photo upload feature disabled for MVP
 
 export const isFirebaseConfigured = () => true;
