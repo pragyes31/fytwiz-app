@@ -1,5 +1,48 @@
 # Troubleshooting Guide
 
+## Issue: Do I need to add my Firebase keys to the .env file?
+
+### Question
+My .env file has placeholder values like:
+```
+VITE_FIREBASE_API_KEY=your_api_key_here
+VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain_here
+...
+```
+
+Do I need to replace these with my actual Firebase credentials?
+
+### Answer
+
+**YES!** You MUST replace ALL placeholder values with your actual Firebase credentials. The app will NOT work with placeholder values.
+
+📖 **See [ENV_SETUP_README.md](./ENV_SETUP_README.md) for complete step-by-step instructions.**
+
+**Quick Summary:**
+1. Go to https://console.firebase.google.com/
+2. Select your project (fytwiz-rhl3101)
+3. Click gear icon ⚙️ → Project Settings
+4. Scroll to "Your apps" section → Find your web app
+5. Copy all 7 values from the firebaseConfig
+6. Replace the placeholder values in your .env file
+7. Save the file
+
+**Example - What you need to do:**
+
+❌ **BEFORE (Won't Work):**
+```env
+VITE_FIREBASE_API_KEY=your_api_key_here
+```
+
+✅ **AFTER (Will Work):**
+```env
+VITE_FIREBASE_API_KEY=AIzaSyD4sJdhARoFthYCztOLAPedjsB1typPcXs
+```
+
+Replace **ALL 7 variables** with your actual values!
+
+---
+
 ## Issue: `.env.example` file not found
 
 ### Problem
