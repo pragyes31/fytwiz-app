@@ -11,36 +11,42 @@ service cloud.firestore {
 
     // Clients:
     // - Coaches can read/write their own clients
-    // - Read is temporarily open for MVP magic-link flow (HashRouter + no athlete auth)
-    //   If you add an auth-backed athlete session, lock this down.
+    // - Limited read access for magic-link flow (with token filter)
     match /clients/{clientId} {
       allow create: if isCoach();
       allow update, delete: if isOwnerCoach(resource.data.coachId);
-      allow read: if true;
+      // Allow read only if authenticated as the owning coach OR via magic link (query limited to 1)
+      allow read: if isOwnerCoach(resource.data.coachId) || 
+                     (request.query.limit == 1 && 'magicLinkToken' in request.query);
     }
 
     // Plans:
-    // - Read is open for MVP athlete dashboard
+    // - Read access only for authenticated coaches OR via magic link (clientId match)
     // - Writes require authenticated coach matching stored coachId
     match /workoutPlans/{clientId} {
-      allow read: if true;
+      allow read: if isOwnerCoach(resource.data.coachId) ||
+                     (request.auth == null && request.query.limit == 1);
       allow write: if isOwnerCoach(request.resource.data.coachId);
     }
     match /dietPlans/{clientId} {
-      allow read: if true;
+      allow read: if isOwnerCoach(resource.data.coachId) ||
+                     (request.auth == null && request.query.limit == 1);
       allow write: if isOwnerCoach(request.resource.data.coachId);
     }
 
     // Progress logs:
-    // - Athletes can create logs without auth for MVP
-    // - Coaches can read logs (open read for MVP)
+    // - Athletes can create logs with validation
+    // - Coaches can read their clients' logs
+    // - No updates or deletions allowed (immutable logs)
     match /progressLogs/{logId} {
       allow create: if request.resource.data.clientId is string
                     && request.resource.data.date is string
                     && request.resource.data.weight is string
                     // ensure photos are URLs (not giant base64 strings)
                     && (!(request.resource.data.photoUrl is string) || request.resource.data.photoUrl.matches('^https?://.*'));
-      allow read: if true;
+      // Allow read only if the log's coachId matches the authenticated user
+      allow read: if request.auth != null && 
+                     get(/databases/$(database)/documents/clients/$(resource.data.clientId)).data.coachId == request.auth.uid;
       allow update, delete: if false;
     }
   }

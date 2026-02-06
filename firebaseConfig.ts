@@ -44,13 +44,13 @@ import { getFirestore } from "firebase/firestore";
  */
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD4sJdhARoFthYCztOLAPedjsB1typPcXs",
-  authDomain: "fytwiz-rhl3101.firebaseapp.com",
-  projectId: "fytwiz-rhl3101",
-  storageBucket: "fytwiz-rhl3101.firebasestorage.app",
-  messagingSenderId: "792457556112",
-  appId: "1:792457556112:web:d8e5ab672bd93254a5e815",
-  measurementId: "G-E475NG18J6"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyD4sJdhARoFthYCztOLAPedjsB1typPcXs",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "fytwiz-rhl3101.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "fytwiz-rhl3101",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "fytwiz-rhl3101.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "792457556112",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:792457556112:web:d8e5ab672bd93254a5e815",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-E475NG18J6"
 };
 
 const app = initializeApp(firebaseConfig);
