@@ -1,5 +1,13 @@
 # 🔒 Security Fixes Quick Start
 
+## 💡 Quick Answer: Do I need to add my Firebase keys to .env?
+
+**YES!** You must replace the placeholder values with your actual Firebase credentials.
+
+📖 **See [ENV_SETUP_README.md](./ENV_SETUP_README.md) for detailed instructions with screenshots and examples.**
+
+---
+
 ## ⚠️ Problem: `.env.example` file not found?
 
 When you run `cp .env.example .env` or `Copy-Item .env.example .env`, you get an error that the file doesn't exist?
@@ -44,8 +52,20 @@ copy .env.example .env
 
 ### 4️⃣ Fill in .env File
 
+**IMPORTANT:** You MUST replace ALL placeholder values with your actual Firebase credentials!
+
+📖 **Detailed guide with examples:** [ENV_SETUP_README.md](./ENV_SETUP_README.md)
+
 Open `.env` in Notepad or any text editor and replace the values:
 
+**BEFORE (placeholders - won't work):**
+```env
+VITE_FIREBASE_API_KEY=your_api_key_here
+VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain_here
+...
+```
+
+**AFTER (your actual values - will work):**
 ```env
 VITE_FIREBASE_API_KEY=AIzaSy...your_actual_key...
 VITE_FIREBASE_AUTH_DOMAIN=fytwiz-rhl3101.firebaseapp.com
@@ -55,6 +75,8 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=792457556112
 VITE_FIREBASE_APP_ID=1:792457556112:web:...your_actual_id...
 VITE_FIREBASE_MEASUREMENT_ID=G-...your_actual_id...
 ```
+
+Replace **ALL 7 values** with your actual credentials from Firebase Console!
 
 Save the file!
 
