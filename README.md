@@ -4,10 +4,13 @@ Coach-first fitness management platform (React + Firebase).
 
 ---
 
-## 🚨 SEEING ERRORS? → [FIX_YOUR_ERRORS_NOW.md](./FIX_YOUR_ERRORS_NOW.md)
+## 🚨 SEEING ERRORS? → [SECURITY_SETUP.md](./SECURITY_SETUP.md)
 
-**Git push rejected? Firebase Storage error?**
-→ See [FIX_YOUR_ERRORS_NOW.md](./FIX_YOUR_ERRORS_NOW.md) for 3-command fix!
+**Can't find `.env.example`? Getting Firebase errors?**
+→ See [SECURITY_SETUP.md](./SECURITY_SETUP.md) for the 5-minute security setup!
+
+**Need to rotate Firebase API keys?**
+→ See [FIREBASE_KEY_ROTATION.md](./FIREBASE_KEY_ROTATION.md) for step-by-step instructions!
 
 ---
 
