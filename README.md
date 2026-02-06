@@ -11,6 +11,39 @@ Coach-first fitness management platform (React + Firebase).
 
 ---
 
+## 🔒 Security Setup Required
+
+**IMPORTANT:** After pulling the latest security fixes, you need to set up environment variables:
+
+1. **Pull the latest changes:**
+   ```bash
+   git pull origin copilot/review-app-vulnerabilities
+   ```
+
+2. **Set up environment variables:**
+   ```bash
+   # Copy the example file
+   cp .env.example .env
+   # Then fill in your Firebase credentials in .env
+   ```
+
+3. **Rotate your Firebase API keys** (they were previously exposed):
+   - See [FIREBASE_KEY_ROTATION.md](./FIREBASE_KEY_ROTATION.md) for detailed step-by-step instructions
+
+4. **Deploy updated Firestore rules:**
+   ```bash
+   firebase deploy --only firestore:rules
+   ```
+
+**Need Help?**
+- 📖 [SUMMARY.md](./SUMMARY.md) - Quick overview of security fixes
+- 🔧 [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) - Common issues and solutions
+- 🔑 [FIREBASE_KEY_ROTATION.md](./FIREBASE_KEY_ROTATION.md) - Step-by-step key rotation guide
+- 📋 [MIGRATION.md](./MIGRATION.md) - Complete migration instructions
+- 🛡️ [SECURITY.md](./SECURITY.md) - Detailed security information
+
+---
+
 ## Getting Started
 
 ### Clone Repository (Fresh Start)

@@ -6,25 +6,34 @@ This guide helps you migrate to the new secure configuration after the security 
 
 If you're in a hurry, follow these minimal steps:
 
-1. **Create .env file:**
+1. **Pull the latest changes:**
+   ```bash
+   git pull origin copilot/review-app-vulnerabilities
+   ```
+
+2. **Create .env file:**
    ```bash
    cp .env.example .env
    ```
+   
+   **Troubleshooting:** If you get "file not found" error, see [TROUBLESHOOTING.md](./TROUBLESHOOTING.md#issue-envexample-file-not-found)
 
-2. **Add your Firebase credentials to .env:**
+3. **Add your Firebase credentials to .env:**
    - Get your credentials from [Firebase Console](https://console.firebase.google.com/)
    - Fill in all the `VITE_FIREBASE_*` variables in your `.env` file
 
-3. **Deploy updated Firestore rules:**
+4. **Deploy updated Firestore rules:**
    - Go to [Firebase Console](https://console.firebase.google.com/) → Firestore Database → Rules
    - Copy the contents of `firestore.rules` 
    - Paste into the Firebase Console rules editor
    - Click "Publish"
 
-4. **Test the application:**
+5. **Test the application:**
    ```bash
    npm run dev
    ```
+
+**Having Issues?** See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for common problems and solutions.
 
 ## Detailed Migration Steps
 
@@ -64,26 +73,38 @@ If you're in a hurry, follow these minimal steps:
 
 Since your Firebase API keys were previously exposed in the source code, you should rotate them:
 
+**📖 See [FIREBASE_KEY_ROTATION.md](./FIREBASE_KEY_ROTATION.md) for complete step-by-step instructions.**
+
+**Quick Summary:**
+
 1. **Go to Google Cloud Console:**
    - Open [Google Cloud Console](https://console.cloud.google.com/)
    - Select your Firebase project
 
-2. **Navigate to API Keys:**
-   - Go to "APIs & Services" → "Credentials"
-   - Find your Firebase API key (starts with "AIzaSy...")
-
-3. **Create a new API key:**
+2. **Create new API key:**
+   - Navigate to "APIs & Services" → "Credentials"
    - Click "Create Credentials" → "API Key"
-   - Restrict the new key to only the APIs your app needs
-   - Add application restrictions (HTTP referrers for web)
+   - Copy the new key immediately
+
+3. **Restrict the new key:**
+   - Add HTTP referrers (your domains)
+   - Enable required Firebase APIs
+   - Save changes
 
 4. **Update your .env file:**
    - Replace `VITE_FIREBASE_API_KEY` with your new key
-   - Keep the old key active for a short transition period
+   - Keep all other values the same
 
-5. **Delete the old key:**
-   - After verifying the new key works, delete the old exposed key
-   - This prevents misuse of the compromised credential
+5. **Test thoroughly:**
+   - Test locally: `npm run dev`
+   - Test production: `npm run build` then deploy
+
+6. **Delete the old key:**
+   - Wait 48 hours to ensure no issues
+   - Go back to Google Cloud Console
+   - Delete the old exposed key
+
+**Full detailed guide with screenshots and troubleshooting:** [FIREBASE_KEY_ROTATION.md](./FIREBASE_KEY_ROTATION.md)
 
 ### Step 3: Deploy New Firestore Security Rules
 
