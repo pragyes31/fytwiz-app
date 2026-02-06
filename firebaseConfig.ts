@@ -44,14 +44,21 @@ import { getFirestore } from "firebase/firestore";
  */
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyD4sJdhARoFthYCztOLAPedjsB1typPcXs",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "fytwiz-rhl3101.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "fytwiz-rhl3101",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "fytwiz-rhl3101.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "792457556112",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:792457556112:web:d8e5ab672bd93254a5e815",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-E475NG18J6"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
+
+// Validate that all required environment variables are set
+if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
+  throw new Error(
+    'Missing required Firebase environment variables. Please copy .env.example to .env and fill in your Firebase credentials.'
+  );
+}
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);

@@ -34,20 +34,23 @@ This document outlines the security vulnerabilities that were identified and fix
 - Anyone with access to the repository could see and potentially misuse these credentials
 
 **Fix:**
-- Modified `firebaseConfig.ts` to use environment variables
+- Modified `firebaseConfig.ts` to use environment variables exclusively
+- Removed hardcoded fallback values to prevent credential exposure
+- Added validation to throw clear error if environment variables are missing
 - Created `.env.example` file with template for required environment variables
 - Updated `.gitignore` to ensure `.env` files are never committed
-- Kept fallback values for backward compatibility during transition
+- Application will fail fast with helpful error message if credentials not configured
 
 **Impact:** Without this fix:
 - Malicious actors could access your Firebase project
 - Potential data breaches or unauthorized access to your database
 - API quota exhaustion if keys are used maliciously
+- Keys visible in version control history (requires key rotation)
 
 **Action Required:**
 1. Create a `.env` file in the project root (copy from `.env.example`)
 2. Fill in your Firebase credentials in the `.env` file
-3. Consider rotating your Firebase API keys in the Firebase Console
+3. **IMPORTANT:** Rotate your Firebase API keys in the Firebase Console since they were previously exposed in source code
 4. Never commit the `.env` file to version control
 
 ### 3. Insecure Firestore Security Rules (CRITICAL SEVERITY)
@@ -62,17 +65,53 @@ This document outlines the security vulnerabilities that were identified and fix
 - Some collections had `allow write: if true` allowing unauthorized modifications
 
 **Fix:**
-- Tightened security rules to require authentication for most operations
-- Clients collection: Now requires authentication as the owning coach OR magic link access
-- Plans collections: Now require authentication as the owning coach OR limited magic link access
-- Progress logs: Coaches can only read their own clients' logs
-- Added proper authorization checks based on coachId
+- Tightened security rules significantly:
+  - Clients collection: Now requires authentication as the owning coach, with limited query access for magic link validation (query limited to 1 result)
+  - Plans collections: Separated `get` (single document) from `list` (query) operations. Get operations allowed for magic link flow (clientId acts as shared secret), list operations require coach authentication
+  - Progress logs: Made immutable (no updates/deletions), require coachId on creation, list queries limited to 100 results
+  - Write operations require authenticated coach with matching coachId
 
-**Impact:** Without this fix:
-- Any user could read all client data, workout plans, diet plans, and progress logs
+**Security Notes & Architectural Limitations:**
+
+The application uses a "magic link" authentication flow for clients (athletes) without requiring them to create accounts. This architectural decision creates some inherent security trade-offs:
+
+1. **Magic Link Security Model:**
+   - Clients access their data via a unique URL containing a magic link token
+   - The token is validated by querying the clients collection
+   - Once validated, the client can access plans using their clientId as a shared secret
+   - This means anyone with a valid magic link URL can access that client's data
+
+2. **Current Security Posture:**
+   - **Coaches:** Fully authenticated with Firebase Auth, data isolated by coachId
+   - **Clients:** No authentication required, access controlled by URL knowledge
+   - **Plans (workout/diet):** Single document reads allowed by ID (for magic link flow)
+   - **Progress Logs:** List queries allowed (filtered by clientId on client-side)
+
+3. **Limitations:**
+   - Anyone who obtains a magic link URL can access that client's data
+   - ClientId values could potentially be guessed (UUIDs provide some protection)
+   - No rate limiting on unauthenticated queries at the Firestore level
+   
+4. **Recommendations for Improved Security:**
+   - Implement proper client authentication (Firebase Anonymous Auth or custom tokens)
+   - Use Firebase App Check to prevent abuse from unauthorized origins
+   - Implement server-side API with proper session management
+   - Add rate limiting and monitoring for suspicious access patterns
+   - Consider time-limited magic links that expire
+   - Store only hashed tokens in the database, not plain text
+
+**Impact:** 
+Without this fix:
+- Any user could enumerate and read all client data, workout plans, diet plans, and progress logs
 - Potential HIPAA/privacy violations if storing health data
 - Data could be scraped, sold, or misused
 - Business competitive intelligence could be stolen
+
+With this fix:
+- Coach data is fully protected by authentication
+- Client data requires knowledge of the magic link URL (reasonable for MVP)
+- Unauthorized enumeration and bulk data access is prevented
+- Clear security boundaries and documentation for future improvements
 
 ## Security Best Practices Going Forward
 
