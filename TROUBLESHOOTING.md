@@ -110,6 +110,150 @@ Then fill in your Firebase credentials (see section below on where to find them)
 
 ---
 
+## Issue: Firebase Authentication API Not Enabled
+
+### Problem
+
+When trying to log in as a coach, you get this error:
+
+```
+Firebase: Error (auth/identity-toolkit-api-has-not-been-used-in-project-XXXX-before-or-it-is-disabled.-enable-it-by-visiting-https://console.developers.google.com/apis/api/identitytoolkit.googleapis.com/overview?project=XXXX-then-retry.-if-you-enabled-this-api-recently,-wait-a-few-minutes-for-the-action-to-propagate-to-our-systems-and-retry.).
+```
+
+Or a shorter version:
+```
+Firebase: Error (auth/identity-toolkit-api-has-not-been-used...)
+```
+
+### What This Means
+
+The **Identity Toolkit API** (which powers Firebase Authentication) is not enabled in your Firebase project. This is required for user login/authentication to work.
+
+### Solution
+
+You need to enable Firebase Authentication in your Firebase project. Here's how:
+
+#### Method 1: Enable via Direct Link (Fastest)
+
+1. **Click the link from the error message** (or use this format):
+   ```
+   https://console.developers.google.com/apis/api/identitytoolkit.googleapis.com/overview?project=YOUR_PROJECT_NUMBER
+   ```
+   Replace `YOUR_PROJECT_NUMBER` with your project number from the error (e.g., 1006195040222)
+
+2. **Click the "Enable" button** on the page
+
+3. **Wait 2-5 minutes** for the API to activate
+
+4. **Try logging in again**
+
+#### Method 2: Enable via Firebase Console (Recommended)
+
+**Step 1: Go to Firebase Console**
+1. Open https://console.firebase.google.com/
+2. Select your project
+
+**Step 2: Navigate to Authentication**
+1. In the left sidebar, click **"Authentication"**
+2. If you see a "Get Started" button, click it
+3. This will automatically enable the Authentication API
+
+**Step 3: Set Up Sign-in Method**
+1. Click on the **"Sign-in method"** tab
+2. Enable **"Email/Password"** provider:
+   - Click on "Email/Password"
+   - Toggle "Enable" to ON
+   - Click "Save"
+
+**Step 4: Wait and Test**
+1. Wait 2-5 minutes for changes to propagate
+2. Try logging in to your app again
+
+#### Method 3: Enable via Google Cloud Console
+
+1. **Open Google Cloud Console:**
+   - Go to https://console.cloud.google.com/
+   - Select your Firebase project from the dropdown
+
+2. **Navigate to APIs & Services:**
+   - Click the menu (☰) → "APIs & Services" → "Library"
+
+3. **Search for Identity Toolkit:**
+   - In the search box, type "Identity Toolkit API"
+   - Click on "Identity Toolkit API" in the results
+
+4. **Enable the API:**
+   - Click the blue "ENABLE" button
+   - Wait for it to be enabled (takes a few seconds)
+
+5. **Verify it's enabled:**
+   - Go to "APIs & Services" → "Dashboard"
+   - You should see "Identity Toolkit API" in the list of enabled APIs
+
+### After Enabling
+
+1. **Wait 2-5 minutes** for the API to fully activate across Google's systems
+
+2. **Clear your browser cache** (or use incognito/private mode):
+   - Press Ctrl+Shift+Delete (Windows/Linux)
+   - Press Cmd+Shift+Delete (Mac)
+   - Select "Cached images and files"
+   - Click "Clear data"
+
+3. **Try logging in again**:
+   - Go to your app
+   - Try the coach login
+   - It should work now!
+
+### Troubleshooting
+
+**If it still doesn't work after 5 minutes:**
+
+1. **Check if Authentication is really enabled:**
+   - Go to Firebase Console → Authentication
+   - You should see the Authentication dashboard (not a "Get Started" button)
+
+2. **Verify Email/Password is enabled:**
+   - Firebase Console → Authentication → Sign-in method
+   - Email/Password should show as "Enabled"
+
+3. **Check API is enabled:**
+   - Go to https://console.cloud.google.com/
+   - Navigate to "APIs & Services" → "Dashboard"
+   - Search for "Identity Toolkit API"
+   - Status should be "Enabled"
+
+4. **Create a test user:**
+   - Firebase Console → Authentication → Users tab
+   - Click "Add user"
+   - Create a test account with email/password
+   - Try logging in with these credentials
+
+5. **Check your .env file:**
+   - Make sure all Firebase credentials are correct
+   - Especially check `VITE_FIREBASE_AUTH_DOMAIN`
+   - It should match your project's auth domain
+
+**If you see "API disabled" or similar:**
+- Your Firebase project might be on a restricted plan
+- Check Firebase Console → Usage and billing
+- Free tier (Spark plan) should be sufficient for this app
+
+**Error persists after 10+ minutes:**
+- Contact Firebase Support
+- Or create a new Firebase project and migrate
+
+### Prevention
+
+When setting up a new Firebase project in the future:
+
+1. ✅ Always enable Authentication first
+2. ✅ Set up Email/Password sign-in method
+3. ✅ Test with a dummy user before connecting your app
+4. ✅ Wait a few minutes after enabling before testing
+
+---
+
 ## Issue: Build fails with "Missing required Firebase environment variables"
 
 ### Problem

@@ -80,13 +80,31 @@ Replace **ALL 7 values** with your actual credentials from Firebase Console!
 
 Save the file!
 
-### 5️⃣ Install Dependencies
+### 5️⃣ Enable Firebase Authentication (CRITICAL!)
+
+**⚠️ You MUST do this before running your app!**
+
+1. Go to **https://console.firebase.google.com/**
+2. Select your project
+3. Click **"Authentication"** in the left sidebar
+4. Click **"Get Started"** (if you see this button)
+5. Go to **"Sign-in method"** tab
+6. Enable **"Email/Password"**:
+   - Click on "Email/Password"
+   - Toggle "Enable" to ON
+   - Click "Save"
+
+**Why?** Without this, you'll get an "Identity Toolkit API" error when trying to log in!
+
+📖 **Detailed guide:** [TROUBLESHOOTING.md](./TROUBLESHOOTING.md#issue-firebase-authentication-api-not-enabled)
+
+### 6️⃣ Install Dependencies
 
 ```powershell
 npm install
 ```
 
-### 6️⃣ Deploy Updated Firestore Security Rules
+### 7️⃣ Deploy Updated Firestore Security Rules
 
 **Option A - Firebase CLI (Recommended):**
 ```powershell
@@ -109,13 +127,15 @@ firebase deploy --only firestore:rules
 6. Paste it into the rules editor
 7. Click "Publish"
 
-### 7️⃣ Start Your App
+### 8️⃣ Start Your App
 
 ```powershell
 npm run dev
 ```
 
 Open http://localhost:5173 in your browser. It should work now! 🎉
+
+**If you get an authentication error:** See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md#issue-firebase-authentication-api-not-enabled)
 
 ---
 

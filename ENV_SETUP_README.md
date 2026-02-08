@@ -103,22 +103,45 @@ VITE_FIREBASE_MEASUREMENT_ID=G-E475NG18J6
 
 ## ✅ After You Fill In Your Values
 
-1. **Save the .env file**
+### Step 1: Enable Firebase Authentication (CRITICAL!)
 
-2. **Deploy Firestore security rules:**
-   ```bash
-   firebase deploy --only firestore:rules
-   ```
+Before starting your app, you MUST enable Firebase Authentication:
 
-3. **Start your development server:**
-   ```bash
-   npm run dev
-   ```
+1. **Go to Firebase Console:** https://console.firebase.google.com/
+2. **Select your project**
+3. **Click "Authentication" in the left sidebar**
+4. **Click "Get Started"** (if you see this button)
+5. **Go to "Sign-in method" tab**
+6. **Enable "Email/Password":**
+   - Click on "Email/Password"
+   - Toggle "Enable" to ON
+   - Click "Save"
 
-4. **Test your app:**
-   - Open http://localhost:5173
-   - Try logging in
-   - Everything should work now!
+⚠️ **If you skip this step, you'll get an "Identity Toolkit API" error when trying to log in!**
+
+See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md#issue-firebase-authentication-api-not-enabled) for detailed instructions.
+
+### Step 2: Save the .env file
+
+Make sure you saved your `.env` file with all the correct values.
+
+### Step 3: Deploy Firestore security rules
+
+```bash
+firebase deploy --only firestore:rules
+```
+
+### Step 4: Start your development server
+
+```bash
+npm run dev
+```
+
+### Step 5: Test your app
+
+- Open http://localhost:5173
+- Try logging in as a coach
+- Everything should work now!
 
 ---
 
@@ -154,6 +177,19 @@ git status
 ---
 
 ## 🆘 Troubleshooting
+
+### Error: "Identity Toolkit API has not been used" or Authentication Error
+
+**This means:** Firebase Authentication is not enabled in your Firebase project.
+
+**Solution:**
+1. Go to Firebase Console → Authentication
+2. Click "Get Started" (if you see it)
+3. Enable "Email/Password" in Sign-in method tab
+4. Wait 2-5 minutes for the API to activate
+5. Try logging in again
+
+📖 **See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md#issue-firebase-authentication-api-not-enabled) for detailed step-by-step instructions.**
 
 ### Error: "Missing required Firebase environment variables"
 
