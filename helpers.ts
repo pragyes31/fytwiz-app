@@ -1,6 +1,20 @@
 
 import * as Types from './types';
 
+/**
+ * Hash a magic link token using SHA-256 via the Web Crypto API.
+ * Returns a hex-encoded string. Used to store hashed tokens in Firestore
+ * so that raw tokens are never used in queries (prevents token leakage
+ * through Firestore query logs / rules evaluation).
+ */
+export async function hashToken(token: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(token);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 export const calculateMealTotals = (items: Types.FoodItem[]) => {
   return items.reduce((acc, item) => ({
     calories: acc.calories + (parseFloat(item.calories) || 0),

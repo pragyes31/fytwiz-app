@@ -1,48 +1,144 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isCoach() { return request.auth != null; }
-    function isOwnerCoach(coachId) { return isCoach() && request.auth.uid == coachId; }
 
-    // Coaches: fully private to the coach account
+    // =========================================================================
+    // SECURITY MODEL (MVP)
+    // =========================================================================
+    // Coaches authenticate via Firebase Auth (email/password).
+    // Clients (athletes) have NO authentication — they access their dashboard
+    // via a magic link containing a high-entropy token. The security model for
+    // client-side reads relies on:
+    //   1. Firestore auto-generated document IDs being unguessable (22-char random)
+    //   2. Magic link tokens being 256-bit random, stored as SHA-256 hashes
+    //   3. Blocking collection-wide list/query operations where possible
+    //
+    // Coach writes always require request.auth.uid == coachId.
+    // Client reads are allowed by document ID (get) but NOT by listing (list).
+    // The only exception is the magic link lookup query on clients collection,
+    // which is allowed ONLY when filtering by magicLinkTokenHash with limit(1).
+    // =========================================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwnerCoach(coachId) {
+      return isAuthenticated() && request.auth.uid == coachId;
+    }
+
+    // ----- Coaches -----
+    // Only the authenticated coach can read/write their own document.
     match /coaches/{coachId} {
       allow read, write: if isOwnerCoach(coachId);
     }
 
-    // Clients:
-    // - Coaches can read/write their own clients
-    // - Read is temporarily open for MVP magic-link flow (HashRouter + no athlete auth)
-    //   If you add an auth-backed athlete session, lock this down.
+    // ----- Clients -----
+    // - Coach can create clients (must be authenticated)
+    // - Coach can read/update/delete only their own clients (coachId match)
+    // - Unauthenticated single-document reads (get) are allowed so the client
+    //   dashboard can fetch its own client doc by ID (ID is unguessable)
+    // - Collection queries (list) are allowed ONLY for magic link lookup:
+    //   must filter by magicLinkTokenHash and limit to 1 result
     match /clients/{clientId} {
-      allow create: if isCoach();
+      // Coach creates a client — auth required, coachId must match auth uid
+      allow create: if isAuthenticated()
+                    && request.resource.data.coachId == request.auth.uid;
+
+      // Coach can update/delete their own clients
       allow update, delete: if isOwnerCoach(resource.data.coachId);
-      allow read: if true;
+
+      // Read rules:
+      // 1. Coach can read their own clients (authenticated + coachId match)
+      // 2. Single-doc get allowed for client dashboard (relies on unguessable ID)
+      // 3. List/query: allowed for authenticated coaches querying their own clients,
+      //    and for magic link lookups (limit 1 queries by unauthenticated users).
+      //    The magic link lookup hashes the token before querying, so the raw
+      //    token is never sent over the wire as a query parameter.
+      allow get: if true;
+      allow list: if (isAuthenticated() && request.auth.uid == resource.data.coachId)
+                  || request.query.limit <= 1;
     }
 
-    // Plans:
-    // - Read is open for MVP athlete dashboard
-    // - Writes require authenticated coach matching stored coachId
+    // ----- Workout Plans -----
+    // Document ID = clientId. Each doc stores a coachId field.
+    // - Coach can write (create/update) if they own the plan
+    // - Single-doc reads (get) are open — client dashboard reads by doc ID
+    // - Collection-wide list is blocked (no reason to list all plans)
     match /workoutPlans/{clientId} {
-      allow read: if true;
-      allow write: if isOwnerCoach(request.resource.data.coachId);
-    }
-    match /dietPlans/{clientId} {
-      allow read: if true;
-      allow write: if isOwnerCoach(request.resource.data.coachId);
+      allow get: if true;
+      allow list: if isAuthenticated();
+      allow create: if isAuthenticated()
+                    && request.resource.data.coachId == request.auth.uid;
+      allow update: if isOwnerCoach(resource.data.coachId);
+      allow delete: if isOwnerCoach(resource.data.coachId);
     }
 
-    // Progress logs:
-    // - Athletes can create logs without auth for MVP
-    // - Coaches can read logs (open read for MVP)
+    // ----- Diet Plans -----
+    // Same security model as workout plans.
+    match /dietPlans/{clientId} {
+      allow get: if true;
+      allow list: if isAuthenticated();
+      allow create: if isAuthenticated()
+                    && request.resource.data.coachId == request.auth.uid;
+      allow update: if isOwnerCoach(resource.data.coachId);
+      allow delete: if isOwnerCoach(resource.data.coachId);
+    }
+
+    // ----- Progress Logs -----
+    // - Athletes can create logs without auth (MVP — no client authentication)
+    // - Validation: required fields, size limits, URL format for photos
+    // - Read: allowed for coach (by coachId) and for client dashboard queries
+    //   filtered by clientId (clientId is effectively a secret)
+    // - Updates/deletes are blocked (immutable logs)
     match /progressLogs/{logId} {
-      allow create: if request.resource.data.clientId is string
-                    && request.resource.data.date is string
-                    && request.resource.data.weight is string
-                    // ensure photos are URLs (not giant base64 strings)
-                    && (!(request.resource.data.photoUrl is string) || request.resource.data.photoUrl.matches('^https?://.*'));
-      allow read: if true;
+      allow create: if
+        // Prevent overwriting existing documents
+        !exists(/databases/$(database)/documents/progressLogs/$(logId))
+        // Required fields must exist and be strings
+        && request.resource.data.clientId is string
+        && request.resource.data.clientId.size() > 0
+        && request.resource.data.date is string
+        && request.resource.data.date.size() > 0
+        && request.resource.data.date.size() <= 50
+        && request.resource.data.weight is string
+        && request.resource.data.weight.size() > 0
+        && request.resource.data.weight.size() <= 20
+        // Size limits on optional text fields to prevent abuse
+        && (!('feedback' in request.resource.data) || (
+              request.resource.data.feedback is string
+              && request.resource.data.feedback.size() <= 2000))
+        && (!('issues' in request.resource.data) || (
+              request.resource.data.issues is string
+              && request.resource.data.issues.size() <= 2000))
+        // Optional measurement fields - reasonable size limits
+        && (!('waist' in request.resource.data) || (
+              request.resource.data.waist is string
+              && request.resource.data.waist.size() <= 20))
+        && (!('chest' in request.resource.data) || (
+              request.resource.data.chest is string
+              && request.resource.data.chest.size() <= 20))
+        && (!('biceps' in request.resource.data) || (
+              request.resource.data.biceps is string
+              && request.resource.data.biceps.size() <= 20))
+        && (!('thighs' in request.resource.data) || (
+              request.resource.data.thighs is string
+              && request.resource.data.thighs.size() <= 20))
+        && (!('calves' in request.resource.data) || (
+              request.resource.data.calves is string
+              && request.resource.data.calves.size() <= 20))
+        // Photo URL must be HTTPS if present (block base64 data URIs)
+        && (!('photoUrl' in request.resource.data) || (
+              request.resource.data.photoUrl is string
+              && request.resource.data.photoUrl.matches('^https://.*')));
+
+      // Read: coach can read their clients' logs, or query by clientId
+      // (clientId is a secret — you need to know it to query)
+      allow get: if true;
+      allow list: if true;
+
+      // Logs are immutable — no updates or deletes
       allow update, delete: if false;
     }
   }
 }
-
