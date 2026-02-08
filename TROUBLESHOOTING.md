@@ -207,6 +207,121 @@ You need to enable Firebase Authentication in your Firebase project. Here's how:
 
 ### Troubleshooting
 
+**If Authentication is ALREADY enabled but you still get the error:**
+
+#### Issue 1: API Key Restrictions Blocking Identity Toolkit
+
+Your Firebase API key might be restricted and not allowing the Identity Toolkit API.
+
+**Solution:**
+
+1. **Go to Google Cloud Console:**
+   - https://console.cloud.google.com/
+   - Select your Firebase project
+
+2. **Find your API key:**
+   - Navigate to "APIs & Services" → "Credentials"
+   - Find your Browser key (the one in your .env file)
+   - Click on it to edit
+
+3. **Check API restrictions:**
+   - Scroll to "API restrictions" section
+   - If "Restrict key" is selected, make sure these APIs are checked:
+     - ✅ Identity Toolkit API
+     - ✅ Cloud Firestore API
+     - ✅ Firebase Installations API
+     - ✅ Token Service API
+   - If "Identity Toolkit API" is NOT in the list, ADD IT
+   - Click "Save"
+
+4. **Wait 2-5 minutes** and try again
+
+#### Issue 2: Wrong Firebase Project
+
+You might be using credentials from a different Firebase project.
+
+**Solution:**
+
+1. **Check your .env file:**
+   ```env
+   VITE_FIREBASE_PROJECT_ID=your-project-id
+   ```
+
+2. **Verify it matches Firebase Console:**
+   - Go to Firebase Console
+   - Check the project name at the top
+   - Compare with your `VITE_FIREBASE_PROJECT_ID`
+
+3. **Check the project number in the error:**
+   - Error message shows: `project-1006195040222`
+   - This should match your Firebase project number
+   - Find your project number: Firebase Console → Project Settings
+
+4. **If they don't match:**
+   - You're using the wrong credentials
+   - Go back to correct Firebase project
+   - Copy the correct credentials
+   - Update your .env file
+
+#### Issue 3: Identity Toolkit API Not Enabled in Google Cloud
+
+Even if Firebase Authentication is enabled, the underlying API might not be.
+
+**Solution:**
+
+1. **Go directly to the API page:**
+   - Use the link from your error message, OR
+   - Go to: https://console.developers.google.com/apis/api/identitytoolkit.googleapis.com/overview?project=YOUR_PROJECT_NUMBER
+   - Replace YOUR_PROJECT_NUMBER with your actual project number
+
+2. **Click "ENABLE"** if you see the button
+
+3. **Wait 2-5 minutes**
+
+4. **Verify it's enabled:**
+   - Go to https://console.cloud.google.com/apis/dashboard
+   - Search for "Identity Toolkit"
+   - Should show as "Enabled"
+
+#### Issue 4: Recently Enabled - Propagation Delay
+
+If you just enabled Authentication, it can take time to propagate.
+
+**Solution:**
+
+1. **Wait longer:**
+   - Initial enablement: 2-5 minutes
+   - Sometimes takes: 10-15 minutes
+   - In rare cases: up to 30 minutes
+
+2. **While waiting:**
+   - Clear browser cache
+   - Try in incognito/private mode
+   - Restart your dev server: `npm run dev`
+
+3. **Check status:**
+   - Google Cloud Console → APIs & Services → Dashboard
+   - Look for "Identity Toolkit API"
+   - If it shows "Enabling..." wait longer
+
+#### Issue 5: Multiple Firebase Projects
+
+You might have multiple Firebase projects and enabled auth in the wrong one.
+
+**Solution:**
+
+1. **Check which project you're using:**
+   - Look at your .env file's `VITE_FIREBASE_PROJECT_ID`
+   - This tells you which project your app uses
+
+2. **Go to that specific project:**
+   - Firebase Console → Select the correct project from dropdown
+   - Make sure you're in the RIGHT project
+
+3. **Enable Authentication in THAT project:**
+   - Not in your other projects
+   - Only in the project matching your .env file
+
 **If it still doesn't work after 5 minutes:**
 
 1. **Check if Authentication is really enabled:**

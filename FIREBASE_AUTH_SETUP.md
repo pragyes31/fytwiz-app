@@ -119,6 +119,43 @@ Providers:
 
 ## 🆘 Still Not Working?
 
+### Still Not Working?
+
+#### Already Enabled Authentication but Still Getting Error?
+
+If Firebase Authentication is ALREADY enabled but you're still seeing the error, try these:
+
+**1. Check API Key Restrictions:**
+- Go to Google Cloud Console → APIs & Services → Credentials
+- Click on your API key (the one in .env)
+- Scroll to "API restrictions"
+- If restricted, make sure "Identity Toolkit API" is checked
+- Click Save and wait 2-5 minutes
+
+**2. Verify Correct Project:**
+- Check your .env file's `VITE_FIREBASE_PROJECT_ID`
+- Make sure it matches the Firebase project where you enabled auth
+- Error message shows project number - verify it matches your project
+
+**3. Enable Identity Toolkit API Directly:**
+- Use the link from error message OR
+- Go to: https://console.cloud.google.com/apis/library/identitytoolkit.googleapis.com
+- Click "ENABLE"
+- Wait 5-10 minutes
+
+**4. Wait Longer:**
+- If just enabled: can take 10-15 minutes
+- Clear browser cache
+- Try incognito/private mode
+- Restart dev server: `npm run dev`
+
+**5. Check You're in the Right Project:**
+- Firebase Console dropdown at top shows project name
+- Make sure it matches your .env file's project ID
+- You might have multiple projects - ensure auth is enabled in the RIGHT one
+
+📖 **See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md#issue-firebase-authentication-api-not-enabled) for complete advanced troubleshooting.**
+
 ### Wait Longer
 - Sometimes it takes 5-10 minutes for the API to fully activate
 - Clear your browser cache and try again

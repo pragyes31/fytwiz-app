@@ -15,6 +15,9 @@ Coach-first fitness management platform (React + Firebase).
 **Getting "Identity Toolkit API" error when logging in?**
 → See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md#issue-firebase-authentication-api-not-enabled) - You need to enable Firebase Authentication!
 
+**Auth already enabled but STILL getting the error?**
+→ See [AUTH_ALREADY_ENABLED.md](./AUTH_ALREADY_ENABLED.md) - Advanced troubleshooting for when auth is enabled!
+
 **Need to rotate Firebase API keys?**
 → See [FIREBASE_KEY_ROTATION.md](./FIREBASE_KEY_ROTATION.md) for step-by-step instructions!
 
