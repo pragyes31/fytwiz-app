@@ -9,6 +9,7 @@ import { auth, db } from '../firebaseConfig';
 import * as Types from '../types';
 import { Button, Logo } from '../components/Shared';
 import { WorkoutPlanEditor, DietPlanEditor } from '../components/Editors';
+import { hashToken } from '../helpers';
 // Added missing X icon to the lucide-react import list
 import { 
   ArrowLeft, Share2, Plus, Users, ChevronRight, UserPlus, Mail, Lock, User, Eye, X
@@ -30,6 +31,10 @@ export const CoachAuth = () => {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
         const res = await createUserWithEmailAndPassword(auth, email, password);
+        // TODO: Add email verification before allowing full access.
+        // Call sendEmailVerification(res.user) and show a "check your email" screen.
+        // Then in the auth state listener, check user.emailVerified before granting access.
+        // This prevents fake email signups and ensures coach identity.
         await setDoc(doc(db, 'coaches', res.user.uid), {
           id: res.user.uid,
           email,
@@ -156,6 +161,11 @@ export const AddClientView = ({ coachId }: { coachId: string }) => {
       .replace(/\//g, '_')
       .replace(/=+$/g, '');
 
+    // Hash the token for secure lookups — raw token is stored for the coach
+    // to copy the magic link, but lookups are done by hash to prevent
+    // token leakage via Firestore query logs.
+    const magicLinkTokenHash = await hashToken(magicLinkToken);
+
     const clientRef = doc(collection(db, 'clients'));
     await setDoc(clientRef, {
       id: clientRef.id,
@@ -168,6 +178,7 @@ export const AddClientView = ({ coachId }: { coachId: string }) => {
       location,
       status: Types.ClientStatus.ON_TRACK,
       magicLinkToken,
+      magicLinkTokenHash,
       createdAt: new Date().toISOString()
     });
     navigate('/coach');

@@ -61,8 +61,10 @@ export interface Client {
   dietPreference?: string;
   status: ClientStatus;
   lastCheckInDate?: string;
-  // We store a strong token for MVP. Consider storing only a hash in production.
+  // Raw token is stored for the coach to copy the magic link.
+  // The hashed version (magicLinkTokenHash) is used for secure lookups.
   magicLinkToken: string;
+  magicLinkTokenHash: string;
 }
 
 export interface WorkoutPlan {

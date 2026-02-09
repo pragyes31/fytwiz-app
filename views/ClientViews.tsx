@@ -7,7 +7,7 @@ import {
 import { db } from '../firebaseConfig';
 import * as Types from '../types';
 import { Logo, Button } from '../components/Shared';
-import { calculateGrandTotal } from '../helpers';
+import { calculateGrandTotal, hashToken } from '../helpers';
 import { Video } from 'lucide-react';
 
 export const CheckInForm = ({ onCancel, onSubmit }: any) => {
@@ -26,10 +26,39 @@ export const CheckInForm = ({ onCancel, onSubmit }: any) => {
   // Note: Photo upload feature temporarily disabled for MVP
   // Firebase Storage requires paid plan - can be re-enabled when ready to upgrade
 
+  // --- Input validation constants ---
+  const MAX_FEEDBACK_LENGTH = 2000;
+  const MAX_ISSUES_LENGTH = 2000;
+  const MAX_MEASUREMENT_LENGTH = 20;
+  const MAX_WEIGHT_LENGTH = 20;
+
+  /** Sanitize text input: trim whitespace, remove control characters */
+  const sanitize = (value: string): string =>
+    value.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim();
+
   const handleFormSubmit = async () => {
     if (!weight) {
       setError('Please enter your weight.');
       return;
+    }
+    if (weight.length > MAX_WEIGHT_LENGTH) {
+      setError('Weight value is too long.');
+      return;
+    }
+    if (feedback.length > MAX_FEEDBACK_LENGTH) {
+      setError(`Weekly notes must be under ${MAX_FEEDBACK_LENGTH} characters.`);
+      return;
+    }
+    if (issues.length > MAX_ISSUES_LENGTH) {
+      setError(`Issues field must be under ${MAX_ISSUES_LENGTH} characters.`);
+      return;
+    }
+    const measurements = { waist, chest, biceps, thighs, calves };
+    for (const [name, value] of Object.entries(measurements)) {
+      if (value.length > MAX_MEASUREMENT_LENGTH) {
+        setError(`${name} value is too long.`);
+        return;
+      }
     }
     
     setError('');
@@ -37,8 +66,15 @@ export const CheckInForm = ({ onCancel, onSubmit }: any) => {
     
     try {
       await onSubmit({ 
-        weight, waist, chest, biceps, thighs, calves, 
-        feedback, followedPlan, issues, 
+        weight: sanitize(weight),
+        waist: sanitize(waist),
+        chest: sanitize(chest),
+        biceps: sanitize(biceps),
+        thighs: sanitize(thighs),
+        calves: sanitize(calves), 
+        feedback: sanitize(feedback),
+        followedPlan,
+        issues: sanitize(issues), 
         date: new Date().toISOString() 
       });
       setIsSubmitting(false);
@@ -87,9 +123,9 @@ export const CheckInForm = ({ onCancel, onSubmit }: any) => {
           </div>
         </div>
         {!followedPlan && (
-          <div className="animate-fade-in"><label className="block text-[10px] font-black uppercase text-slate-400 mb-2">What went wrong?</label><textarea className="w-full p-4 bg-slate-50 rounded-2xl min-h-[80px] outline-none border border-slate-100" value={issues} onChange={e => setIssues(e.target.value)} /></div>
+          <div className="animate-fade-in"><label className="block text-[10px] font-black uppercase text-slate-400 mb-2">What went wrong?</label><textarea maxLength={MAX_ISSUES_LENGTH} className="w-full p-4 bg-slate-50 rounded-2xl min-h-[80px] outline-none border border-slate-100" value={issues} onChange={e => setIssues(e.target.value)} /><p className="text-right text-[9px] text-slate-300 mt-1">{issues.length}/{MAX_ISSUES_LENGTH}</p></div>
         )}
-        <div><label className="block text-[10px] font-black uppercase text-slate-400 mb-2">Weekly Notes</label><textarea className="w-full p-4 bg-slate-50 rounded-2xl min-h-[120px] outline-none border border-slate-100" value={feedback} onChange={e => setFeedback(e.target.value)} /></div>
+        <div><label className="block text-[10px] font-black uppercase text-slate-400 mb-2">Weekly Notes</label><textarea maxLength={MAX_FEEDBACK_LENGTH} className="w-full p-4 bg-slate-50 rounded-2xl min-h-[120px] outline-none border border-slate-100" value={feedback} onChange={e => setFeedback(e.target.value)} /><p className="text-right text-[9px] text-slate-300 mt-1">{feedback.length}/{MAX_FEEDBACK_LENGTH}</p></div>
       </div>
       <Button onClick={handleFormSubmit} className="w-full py-4 text-lg" disabled={isSubmitting}>
         {isSubmitting ? 'Sending...' : 'Send to Coach'}
@@ -296,10 +332,16 @@ export const MagicLogin = () => {
   const { token } = useParams();
   const navigate = useNavigate();
   useEffect(() => {
-    const q = query(collection(db, 'clients'), where('magicLinkToken', '==', token), limit(1));
-    getDocs(q).then(s => {
-      if (!s.empty) navigate(`/client/dashboard/${s.docs[0].id}`);
-      else alert("Invalid Link.");
+    if (!token) return;
+    // Hash the token from the URL before querying Firestore.
+    // This ensures the raw token is never sent as a Firestore query value,
+    // preventing token leakage via query logs or network inspection.
+    hashToken(token).then(hashedToken => {
+      const q = query(collection(db, 'clients'), where('magicLinkTokenHash', '==', hashedToken), limit(1));
+      getDocs(q).then(s => {
+        if (!s.empty) navigate(`/client/dashboard/${s.docs[0].id}`);
+        else alert("Invalid Link.");
+      });
     });
   }, [token, navigate]);
   return <div className="p-12 text-center font-bold text-slate-300 animate-pulse">Authenticating...</div>;

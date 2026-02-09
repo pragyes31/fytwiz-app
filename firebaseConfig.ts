@@ -5,42 +5,14 @@ import { getFirestore } from "firebase/firestore";
 // Storage removed for MVP - no photo uploads (Firebase Storage requires paid plan)
 
 /**
- * PRODUCTION SECURITY RULES (COPY & PASTE INTO FIREBASE CONSOLE):
- * 
- * service cloud.firestore {
- *   match /databases/{database}/documents {
- *     
- *     // Rules for Coaches
- *     match /coaches/{coachId} {
- *       allow read, write: if request.auth != null && request.auth.uid == coachId;
- *     }
- *     
- *     // Rules for Clients (Athletes)
- *     match /clients/{clientId} {
- *       // Only authenticated coaches can create/update their own clients
- *       allow create: if request.auth != null;
- *       allow update, delete: if request.auth != null && request.auth.uid == resource.data.coachId;
- *       
- *       // Allow reads if:
- *       // 1. You are the coach of this client
- *       // 2. OR you are searching for a magic link (limit 1 query with token filter)
- *       allow read: if (request.auth != null && request.auth.uid == resource.data.coachId) ||
- *                   (request.query.limit == 1); 
- *     }
- *     
- *     // Rules for Plans and Logs
- *     match /workoutPlans/{clientId} {
- *       allow read, write: if true; // In full prod, scope these to coachId check
- *     }
- *     match /dietPlans/{clientId} {
- *       allow read, write: if true;
- *     }
- *     match /progressLogs/{logId} {
- *       allow create: if true; // Allow athletes to submit logs via magic link
- *       allow read, update, delete: if true; // Full prod: scope to coachId / clientId
- *     }
- *   }
- * }
+ * PRODUCTION SECURITY RULES:
+ * See firestore.rules for the full ruleset.
+ * Key security model:
+ * - Coach writes require request.auth.uid == coachId
+ * - Client reads rely on unguessable doc IDs + magic link token hashing
+ * - Magic link lookup queries by SHA-256 hash, not raw token
+ * - Progress logs are validated and immutable (no update/delete)
+ * - Collection-wide listing is blocked where possible
  */
 
 const firebaseConfig = {
