@@ -6,6 +6,8 @@ import { db } from '../firebaseConfig';
 import * as Types from '../types';
 import { Button } from './Shared';
 import { calculateGrandTotal } from '../helpers';
+import { FoodSearch } from './FoodSearch';
+import { FoodDBItem } from '../foodDatabase';
 
 export const WorkoutPlanEditor = ({ clientId, coachId, currentPlan }: any) => {
   const [days, setDays] = useState<Types.WorkoutDay[]>(currentPlan?.days || []);
@@ -61,11 +63,60 @@ export const WorkoutPlanEditor = ({ clientId, coachId, currentPlan }: any) => {
 export const DietPlanEditor = ({ clientId, coachId, currentPlan }: any) => {
   const [meals, setMeals] = useState<Types.Meal[]>(currentPlan?.meals || []);
   const [saved, setSaved] = useState(false);
+  // Track which food items have a DB match (for showing per-100g hints)
+  const [foodMeta, setFoodMeta] = useState<Record<string, FoodDBItem>>({});
 
   const addMeal = () => setMeals([...meals, { id: Math.random().toString(), name: 'Meal ' + (meals.length + 1), items: [] }]);
-  const addItem = (mealId: string) => setMeals(meals.map(m => m.id === mealId ? { ...m, items: [...m.items, { id: Math.random().toString(), name: '', amount: '', calories: '', protein: '', carbs: '', fats: '' }] } : m));
+  const addItem = (mealId: string) => setMeals(meals.map(m => m.id === mealId ? { ...m, items: [...m.items, { id: Math.random().toString(), name: '', amount: '', weightGrams: '', calories: '', protein: '', carbs: '', fats: '' }] } : m));
   const updateItem = (mealId: string, itemId: string, field: string, val: string) => setMeals(meals.map(m => m.id === mealId ? { ...m, items: m.items.map(i => i.id === itemId ? { ...i, [field]: val } : i) } : m));
-  const removeItem = (mealId: string, itemId: string) => setMeals(meals.map(m => m.id === mealId ? { ...m, items: m.items.filter(i => i.id !== itemId) } : m));
+  const removeItem = (mealId: string, itemId: string) => {
+    setMeals(meals.map(m => m.id === mealId ? { ...m, items: m.items.filter(i => i.id !== itemId) } : m));
+    setFoodMeta(prev => { const next = { ...prev }; delete next[itemId]; return next; });
+  };
+
+  const handleFoodSelect = (mealId: string, itemId: string, food: FoodDBItem) => {
+    setFoodMeta(prev => ({ ...prev, [itemId]: food }));
+    // Update item name and set default weight from common serving
+    setMeals(meals.map(m => m.id === mealId ? {
+      ...m,
+      items: m.items.map(i => {
+        if (i.id !== itemId) return i;
+        const weight = food.commonServingGrams || 100;
+        const weightStr = String(weight);
+        return {
+          ...i,
+          name: food.name,
+          amount: food.commonServing || `${weight}g`,
+          weightGrams: weightStr,
+          calories: String(Math.round((food.caloriesPer100g * weight) / 100)),
+          protein: String(Math.round((food.proteinPer100g * weight) / 100 * 10) / 10),
+          carbs: String(Math.round((food.carbsPer100g * weight) / 100 * 10) / 10),
+          fats: String(Math.round((food.fatsPer100g * weight) / 100 * 10) / 10),
+        };
+      })
+    } : m));
+  };
+
+  const handleWeightChange = (mealId: string, itemId: string, weightStr: string) => {
+    const food = foodMeta[itemId];
+    setMeals(meals.map(m => m.id === mealId ? {
+      ...m,
+      items: m.items.map(i => {
+        if (i.id !== itemId) return i;
+        const updated = { ...i, weightGrams: weightStr, amount: weightStr ? `${weightStr}g` : '' };
+        if (food && weightStr) {
+          const w = parseFloat(weightStr);
+          if (!isNaN(w)) {
+            updated.calories = String(Math.round((food.caloriesPer100g * w) / 100));
+            updated.protein = String(Math.round((food.proteinPer100g * w) / 100 * 10) / 10);
+            updated.carbs = String(Math.round((food.carbsPer100g * w) / 100 * 10) / 10);
+            updated.fats = String(Math.round((food.fatsPer100g * w) / 100 * 10) / 10);
+          }
+        }
+        return updated;
+      })
+    } : m));
+  };
 
   const handleSave = async () => {
     await setDoc(
@@ -95,11 +146,29 @@ export const DietPlanEditor = ({ clientId, coachId, currentPlan }: any) => {
           <div className="space-y-3">
             {meal.items.map(item => (
               <div key={item.id} className="p-4 bg-slate-50 rounded-2xl space-y-3 relative">
-                <button onClick={() => removeItem(meal.id, item.id)} className="absolute top-2 right-2 text-slate-300 hover:text-red-500"><X size={14}/></button>
+                <button onClick={() => removeItem(meal.id, item.id)} className="absolute top-2 right-2 text-slate-300 hover:text-red-500 z-10"><X size={14}/></button>
                 <div className="flex gap-2">
-                  <input placeholder="Food Item" className="flex-1 p-2 bg-white rounded-lg text-sm font-bold" value={item.name} onChange={e => updateItem(meal.id, item.id, 'name', e.target.value)} />
-                  <input placeholder="Qty" className="w-20 p-2 bg-white rounded-lg text-sm font-bold text-center" value={item.amount} onChange={e => updateItem(meal.id, item.id, 'amount', e.target.value)} />
+                  <div className="flex-1">
+                    <FoodSearch
+                      value={item.name}
+                      onChange={(name) => updateItem(meal.id, item.id, 'name', name)}
+                      onSelect={(food) => handleFoodSelect(meal.id, item.id, food)}
+                      placeholder="Search food..."
+                    />
+                  </div>
+                  <input
+                    placeholder="Wt (g)"
+                    type="number"
+                    className="w-20 p-2 bg-white rounded-lg text-sm font-bold text-center border border-slate-100 outline-none focus:ring-2 focus:ring-blue-500"
+                    value={item.weightGrams || ''}
+                    onChange={e => handleWeightChange(meal.id, item.id, e.target.value)}
+                  />
                 </div>
+                {foodMeta[item.id] && (
+                  <p className="text-[10px] text-slate-400 font-medium px-1">
+                    Per 100g: {foodMeta[item.id].caloriesPer100g} kcal · {foodMeta[item.id].proteinPer100g}g P · {foodMeta[item.id].carbsPer100g}g C · {foodMeta[item.id].fatsPer100g}g F
+                  </p>
+                )}
                 <div className="grid grid-cols-4 gap-2">
                    <div className="bg-white p-2 rounded-lg text-center"><input placeholder="kcal" className="w-full text-xs font-black text-center outline-none" value={item.calories} onChange={e => updateItem(meal.id, item.id, 'calories', e.target.value)} /><p className="text-[9px] text-slate-400 font-bold">KCAL</p></div>
                    <div className="bg-white p-2 rounded-lg text-center"><input placeholder="P" className="w-full text-xs font-black text-center outline-none" value={item.protein} onChange={e => updateItem(meal.id, item.id, 'protein', e.target.value)} /><p className="text-[9px] text-slate-400 font-bold">PRO</p></div>

@@ -1,4 +1,3 @@
-
 export enum ClientGoal {
   FAT_LOSS = 'fat loss',
   MUSCLE_GAIN = 'muscle gain',
@@ -28,6 +27,7 @@ export interface FoodItem {
   id: string;
   name: string;
   amount: string;
+  weightGrams?: string; // Weight in grams for auto-macro calculation
   calories: string;
   protein: string;
   carbs: string;
