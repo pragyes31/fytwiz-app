@@ -46,7 +46,12 @@ service cloud.firestore {
                     && request.resource.data.coachId == request.auth.uid;
 
       // Coach can update/delete their own clients
-      allow update, delete: if isOwnerCoach(resource.data.coachId);
+      // Also allow unauthenticated updates ONLY for lastCheckInDate field
+      // (client dashboard updates this after submitting a check-in)
+      allow update: if isOwnerCoach(resource.data.coachId)
+                    || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastCheckInDate'])
+                        && request.resource.data.lastCheckInDate is string);
+      allow delete: if isOwnerCoach(resource.data.coachId);
 
       // Read rules:
       // 1. Coach can read their own clients (authenticated + coachId match)
@@ -130,7 +135,13 @@ service cloud.firestore {
         // Photo URL must be HTTPS if present (block base64 data URIs)
         && (!('photoUrl' in request.resource.data) || (
               request.resource.data.photoUrl is string
-              && request.resource.data.photoUrl.matches('^https://.*')));
+              && request.resource.data.photoUrl.matches('^https://.*')))
+        // followedPlan must be boolean if present
+        && (!('followedPlan' in request.resource.data) || 
+              request.resource.data.followedPlan is bool)
+        // coachId must be string if present
+        && (!('coachId' in request.resource.data) || 
+              request.resource.data.coachId is string);
 
       // Read: coach can read their clients' logs, or query by clientId
       // (clientId is a secret — you need to know it to query)
