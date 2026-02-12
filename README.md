@@ -9,6 +9,15 @@ Coach-first fitness management platform (React + Firebase).
 **Can't find `.env.example`? Getting Firebase errors?**
 → See [SECURITY_SETUP.md](./SECURITY_SETUP.md) for the 5-minute security setup!
 
+**Question: Do I need to add my Firebase keys to the .env file?**
+→ **YES!** See [ENV_SETUP_README.md](./ENV_SETUP_README.md) for step-by-step instructions!
+
+**Getting "Identity Toolkit API" error when logging in?**
+→ See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md#issue-firebase-authentication-api-not-enabled) - You need to enable Firebase Authentication!
+
+**Auth already enabled but STILL getting the error?**
+→ See [AUTH_ALREADY_ENABLED.md](./AUTH_ALREADY_ENABLED.md) - Advanced troubleshooting for when auth is enabled!
+
 **Need to rotate Firebase API keys?**
 → See [FIREBASE_KEY_ROTATION.md](./FIREBASE_KEY_ROTATION.md) for step-by-step instructions!
 
@@ -29,11 +38,21 @@ Coach-first fitness management platform (React + Firebase).
    cp .env.example .env
    # Then fill in your Firebase credentials in .env
    ```
+   
+   **⚠️ IMPORTANT:** You MUST replace the placeholder values with your actual Firebase credentials!
+   
+   📖 **See [ENV_SETUP_README.md](./ENV_SETUP_README.md) for detailed instructions on how to get and fill in your Firebase credentials.**
 
-3. **Rotate your Firebase API keys** (they were previously exposed):
+3. **Enable Firebase Authentication** (CRITICAL!):
+   - Go to Firebase Console → Authentication
+   - Click "Get Started" 
+   - Enable "Email/Password" sign-in method
+   - See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md#issue-firebase-authentication-api-not-enabled) for details
+
+4. **Rotate your Firebase API keys** (they were previously exposed):
    - See [FIREBASE_KEY_ROTATION.md](./FIREBASE_KEY_ROTATION.md) for detailed step-by-step instructions
 
-4. **Deploy updated Firestore rules:**
+5. **Deploy updated Firestore rules:**
    ```bash
    firebase deploy --only firestore:rules
    ```

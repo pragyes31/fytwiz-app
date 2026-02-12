@@ -1,5 +1,13 @@
 # 🔒 Security Fixes Quick Start
 
+## 💡 Quick Answer: Do I need to add my Firebase keys to .env?
+
+**YES!** You must replace the placeholder values with your actual Firebase credentials.
+
+📖 **See [ENV_SETUP_README.md](./ENV_SETUP_README.md) for detailed instructions with screenshots and examples.**
+
+---
+
 ## ⚠️ Problem: `.env.example` file not found?
 
 When you run `cp .env.example .env` or `Copy-Item .env.example .env`, you get an error that the file doesn't exist?
@@ -44,8 +52,20 @@ copy .env.example .env
 
 ### 4️⃣ Fill in .env File
 
+**IMPORTANT:** You MUST replace ALL placeholder values with your actual Firebase credentials!
+
+📖 **Detailed guide with examples:** [ENV_SETUP_README.md](./ENV_SETUP_README.md)
+
 Open `.env` in Notepad or any text editor and replace the values:
 
+**BEFORE (placeholders - won't work):**
+```env
+VITE_FIREBASE_API_KEY=your_api_key_here
+VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain_here
+...
+```
+
+**AFTER (your actual values - will work):**
 ```env
 VITE_FIREBASE_API_KEY=AIzaSy...your_actual_key...
 VITE_FIREBASE_AUTH_DOMAIN=fytwiz-rhl3101.firebaseapp.com
@@ -56,15 +76,35 @@ VITE_FIREBASE_APP_ID=1:792457556112:web:...your_actual_id...
 VITE_FIREBASE_MEASUREMENT_ID=G-...your_actual_id...
 ```
 
+Replace **ALL 7 values** with your actual credentials from Firebase Console!
+
 Save the file!
 
-### 5️⃣ Install Dependencies
+### 5️⃣ Enable Firebase Authentication (CRITICAL!)
+
+**⚠️ You MUST do this before running your app!**
+
+1. Go to **https://console.firebase.google.com/**
+2. Select your project
+3. Click **"Authentication"** in the left sidebar
+4. Click **"Get Started"** (if you see this button)
+5. Go to **"Sign-in method"** tab
+6. Enable **"Email/Password"**:
+   - Click on "Email/Password"
+   - Toggle "Enable" to ON
+   - Click "Save"
+
+**Why?** Without this, you'll get an "Identity Toolkit API" error when trying to log in!
+
+📖 **Detailed guide:** [TROUBLESHOOTING.md](./TROUBLESHOOTING.md#issue-firebase-authentication-api-not-enabled)
+
+### 6️⃣ Install Dependencies
 
 ```powershell
 npm install
 ```
 
-### 6️⃣ Deploy Updated Firestore Security Rules
+### 7️⃣ Deploy Updated Firestore Security Rules
 
 **Option A - Firebase CLI (Recommended):**
 ```powershell
@@ -87,13 +127,15 @@ firebase deploy --only firestore:rules
 6. Paste it into the rules editor
 7. Click "Publish"
 
-### 7️⃣ Start Your App
+### 8️⃣ Start Your App
 
 ```powershell
 npm run dev
 ```
 
 Open http://localhost:5173 in your browser. It should work now! 🎉
+
+**If you get an authentication error:** See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md#issue-firebase-authentication-api-not-enabled)
 
 ---
 
